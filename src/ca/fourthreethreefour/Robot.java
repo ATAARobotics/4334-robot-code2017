@@ -1,6 +1,10 @@
 package ca.fourthreethreefour; //ca.4334 isn't an acceptable Java package identifier so typing out the numbers will work I guess
 
+import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import edu.first.module.actuators.Drivetrain;
+import edu.first.module.actuators.DualActionSolenoid;
+import edu.first.module.actuators.DualActionSolenoidModule;
+import edu.first.module.actuators.DualActionSolenoidModuleGroup;
 import edu.first.module.actuators.VictorModule;
 import edu.first.module.actuators.VictorModuleGroup;
 import edu.first.module.joysticks.XboxController;
@@ -24,10 +28,17 @@ public class Robot extends IterativeRobotAdapter {
 	
 	Drivetrain drivetrain = new Drivetrain(left, right);
 	
-	XboxController controller = new XboxController(0);
+	XboxController controller1 = new XboxController(0);
+	XboxController controller2 = new XboxController(1);
+	
+	DualActionSolenoidModule unload1 = new DualActionSolenoidModule(0, 1);
+	DualActionSolenoidModule unload2 = new DualActionSolenoidModule(2, 3);
+	
+	DualActionSolenoidModuleGroup unload = new DualActionSolenoidModuleGroup(new DualActionSolenoidModule[] { unload1, unload2 });
 	
 	Subsystem ALL_MODULES = new SubsystemBuilder()
-			.add(controller)
+			.add(controller1)
+			.add(controller2)
 			.add(drivetrain)
 				.add(left)
 					.add(left1)
@@ -37,6 +48,9 @@ public class Robot extends IterativeRobotAdapter {
 					.add(right1)
 					.add(right2)
 					.add(right3)
+			.add(unload)
+				.add(unload1)
+				.add(unload2)
 			
 			.toSubsystem();
 
@@ -48,15 +62,16 @@ public class Robot extends IterativeRobotAdapter {
 	public void init() {
 		ALL_MODULES.init();
 		
-		controller.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.15);
-		controller.addDeadband(XboxController.RIGHT_FROM_MIDDLE, 0.15);
+		controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.15);
+		controller1.addDeadband(XboxController.RIGHT_FROM_MIDDLE, 0.15);
 		
-		controller.addAxisBind(
+		controller1.addAxisBind(
 				drivetrain.getTank(
-						controller.getLeftDistanceFromMiddle(), 
-						controller.getRightDistanceFromMiddle()));
+						controller1.getLeftDistanceFromMiddle(), 
+						controller1.getRightDistanceFromMiddle()));
+		
+		controller2.addWhenPressed(XboxController.B, new ReverseDualActionSolenoid(unload));
 	}
-	
 	@Override
 	public void initAutonomous() {
 		ALL_MODULES.enable();
@@ -65,6 +80,7 @@ public class Robot extends IterativeRobotAdapter {
 	@Override
 	public void initTeleoperated() {
 		ALL_MODULES.enable();
+		unload.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
@@ -74,7 +90,8 @@ public class Robot extends IterativeRobotAdapter {
 	
 	@Override
 	public void periodicTeleoperated() {
-		controller.doBinds();
-		drivetrain.tankDrive(controller.getLeftYValue(), controller.getRightYValue());
+		controller1.doBinds();
+		controller2.doBinds();
+		drivetrain.tankDrive(controller1.getLeftYValue(), controller1.getRightYValue());
 	}
 }

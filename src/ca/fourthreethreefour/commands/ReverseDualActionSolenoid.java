@@ -1,12 +1,12 @@
 package ca.fourthreethreefour.commands;
 
 import edu.first.command.Command;
-import edu.first.module.actuators.DualActionSolenoid;
+import edu.first.module.actuators.DualActionSolenoidModule;
 
 public final class ReverseDualActionSolenoid implements Command {
 	
-	private final DualActionSolenoid solenoid;
-	public ReverseDualActionSolenoid(DualActionSolenoid solenoid) {
+	private final DualActionSolenoidModule solenoid;
+	public ReverseDualActionSolenoid(DualActionSolenoidModule solenoid) {
 		this.solenoid = solenoid;
 	}
 

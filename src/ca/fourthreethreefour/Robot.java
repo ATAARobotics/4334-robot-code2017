@@ -1,6 +1,6 @@
 package ca.fourthreethreefour; //ca.4334 isn't an acceptable Java package identifier so typing out the numbers will work I guess
 
-import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
+import ca.fourthreethreefour.commands.ReverseDualActionSolenoidGroup;
 import edu.first.module.actuators.Drivetrain;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoidModule;
@@ -70,8 +70,9 @@ public class Robot extends IterativeRobotAdapter {
 						controller1.getLeftDistanceFromMiddle(), 
 						controller1.getRightDistanceFromMiddle()));
 		
-		controller2.addWhenPressed(XboxController.B, new ReverseDualActionSolenoid(unload));
+		controller2.addWhenPressed(XboxController.B, new ReverseDualActionSolenoidGroup(unload)); //TODO see if this actually does anything
 	}
+	
 	@Override
 	public void initAutonomous() {
 		ALL_MODULES.enable();

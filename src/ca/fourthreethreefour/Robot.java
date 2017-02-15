@@ -28,13 +28,22 @@ public class Robot extends IterativeRobotAdapter {
 	
 	Drivetrain drivetrain = new Drivetrain(left, right);
 	
-	XboxController controller1 = new XboxController(0);
-	XboxController controller2 = new XboxController(1);
+	VictorModule 
+		climber1 = new VictorModule(6), 
+		climber2 = new VictorModule(7);
 	
-	DualActionSolenoidModule unload1 = new DualActionSolenoidModule(0, 1);
-	DualActionSolenoidModule unload2 = new DualActionSolenoidModule(2, 3);
+	VictorModuleGroup climber = new VictorModuleGroup(new VictorModule[] { climber1, climber2 });
 	
-	DualActionSolenoidModuleGroup unload = new DualActionSolenoidModuleGroup(new DualActionSolenoidModule[] { unload1, unload2 });
+	XboxController 
+		controller1 = new XboxController(0),
+		controller2 = new XboxController(1);
+	
+	DualActionSolenoidModule 
+		unload1 = new DualActionSolenoidModule(0, 1),
+		unload2 = new DualActionSolenoidModule(2, 3);
+	
+	DualActionSolenoidModuleGroup unload = new DualActionSolenoidModuleGroup
+			(new DualActionSolenoidModule[] { unload1, unload2 });
 	
 	Subsystem ALL_MODULES = new SubsystemBuilder()
 			.add(controller1)
@@ -70,18 +79,18 @@ public class Robot extends IterativeRobotAdapter {
 						controller1.getLeftDistanceFromMiddle(), 
 						controller1.getRightDistanceFromMiddle()));
 		
-		controller2.addWhenPressed(XboxController.B, new ReverseDualActionSolenoidGroup(unload)); //TODO see if this actually does anything
+		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoidGroup(unload)); //TODO see if this actually does anything
 	}
 	
 	@Override
 	public void initAutonomous() {
 		ALL_MODULES.enable();
+		unload.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
 	public void initTeleoperated() {
 		ALL_MODULES.enable();
-		unload.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
@@ -94,5 +103,6 @@ public class Robot extends IterativeRobotAdapter {
 		controller1.doBinds();
 		controller2.doBinds();
 		drivetrain.tankDrive(controller1.getLeftYValue(), controller1.getRightYValue());
+		climber.setSpeed(controller1.getRightTriggerValue());
 	}
 }

@@ -8,9 +8,11 @@ import edu.first.module.actuators.DualActionSolenoidModuleGroup;
 import edu.first.module.actuators.VictorModule;
 import edu.first.module.actuators.VictorModuleGroup;
 import edu.first.module.joysticks.XboxController;
+import edu.first.module.sensors.DigitalInput;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.module.subsystems.SubsystemBuilder;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 	
@@ -44,6 +46,8 @@ public class Robot extends IterativeRobotAdapter {
 	
 	DualActionSolenoidModuleGroup unload = new DualActionSolenoidModuleGroup
 			(new DualActionSolenoidModule[] { unload1, unload2 });
+	
+	DigitalInput limitSwitch = new DigitalInput(0); //TODO get actual channel
 	
 	Subsystem ALL_MODULES = new SubsystemBuilder()
 			.add(controller1)
@@ -103,5 +107,7 @@ public class Robot extends IterativeRobotAdapter {
 	public void periodicTeleoperated() {
 		controller1.doBinds();
 		controller2.doBinds();
+		
+		SmartDashboard.putBoolean("Has Gear", limitSwitch.getPosition());
 	}
 }

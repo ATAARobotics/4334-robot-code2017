@@ -80,6 +80,7 @@ public class Robot extends IterativeRobotAdapter {
 						controller1.getRightDistanceFromMiddle()));
 		
 		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoidGroup(unload)); //TODO see if this actually does anything
+		controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climber);
 	}
 	
 	@Override
@@ -102,7 +103,5 @@ public class Robot extends IterativeRobotAdapter {
 	public void periodicTeleoperated() {
 		controller1.doBinds();
 		controller2.doBinds();
-		drivetrain.tankDrive(controller1.getLeftYValue(), controller1.getRightYValue());
-		climber.setSpeed(controller1.getRightTriggerValue());
 	}
 }

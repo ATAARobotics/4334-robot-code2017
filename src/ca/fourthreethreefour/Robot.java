@@ -93,6 +93,5 @@ public class Robot extends IterativeRobotAdapter {
 	public void periodicTeleoperated() {
 		controller1.doBinds();
 		controller2.doBinds();
-		drivetrain.tankDrive(controller1.getLeftYValue(), controller1.getRightYValue());
 	}
 }

@@ -97,6 +97,7 @@ public class Robot extends IterativeRobotAdapter {
 		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoidGroup(unloader)); //TODO see if this actually does anything
 		controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climber);
 		//TODO add PID (get setpoint and P, I and D coefficients)
+
 	}
 	
 	@Override
@@ -108,6 +109,7 @@ public class Robot extends IterativeRobotAdapter {
 	@Override
 	public void initTeleoperated() {
 		ALL_MODULES.enable();
+		unload.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override

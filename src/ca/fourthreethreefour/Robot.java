@@ -46,7 +46,7 @@ public class Robot extends IterativeRobotAdapter {
 		//TODO get setpoint for PID
 		controller2.addWhenPressed(XboxController.B, new EnableModule(wipersPID));
 		controller2.addWhenReleased(XboxController.B, new DisableModule(wipersPID));
-		
+
 	}
 	
 	@Override

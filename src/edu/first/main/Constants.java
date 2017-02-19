@@ -1,5 +1,12 @@
 package edu.first.main;
 
+import ca.fourthreethreefour.subsystems.Climber;
+import ca.fourthreethreefour.subsystems.Controllers;
+import ca.fourthreethreefour.subsystems.Drive;
+import ca.fourthreethreefour.subsystems.Settings;
+import ca.fourthreethreefour.subsystems.Unload;
+import ca.fourthreethreefour.subsystems.Wipers;
+
 /**
  * The central repository for all constant values. Values here are expected to
  * be accessible to the entire program, and for anyone to view.
@@ -40,5 +47,5 @@ package edu.first.main;
  * @since May 07 13
  * @author Joel Gallant
  */
-public interface Constants {
+public interface Constants extends Drive, Climber, Unload, Wipers, Controllers, Settings {
 }

@@ -1,6 +1,5 @@
 package ca.fourthreethreefour.subsystems;
 
-import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.Drivetrain;
 import edu.first.module.actuators.VictorModule;
@@ -21,7 +20,7 @@ public interface Drive extends Settings {
 			new VictorModule(5)
 	});
 
-	Drivetrain drivetrain = new Drivetrain(left, new InversedSpeedController(right));
+	Drivetrain drivetrain = new Drivetrain(left, right);
 
 	Subsystem drive = new Subsystem(new Module[] {
 			drivetrain, left, right

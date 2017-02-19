@@ -36,7 +36,7 @@ public class Robot extends IterativeRobotAdapter {
 		controller1.addDeadband(XboxController.RIGHT_FROM_MIDDLE, 0.15);
 		
 		controller1.addAxisBind(
-				drivetrain.getTank(
+				drivetrain.getArcade(
 						controller1.getLeftDistanceFromMiddle(), 
 						controller1.getRightDistanceFromMiddle()));
 		

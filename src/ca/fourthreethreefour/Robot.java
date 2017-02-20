@@ -39,8 +39,8 @@ public class Robot extends IterativeRobotAdapter {
 				drivetrain.getArcade(
 						controller1.getLeftDistanceFromMiddle(), 
 						controller1.getRightDistanceFromMiddle()));
-		
-		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid)); //TODO see if this actually does anything
+
+		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid));
 		controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
 		
 		//TODO get setpoint for PID

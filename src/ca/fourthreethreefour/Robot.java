@@ -1,58 +1,28 @@
 package ca.fourthreethreefour; //ca.4334 isn't an acceptable Java package identifier so typing out the numbers will work I guess
 
+import ca.fourthreethreefour.commands.DisableModule;
+import ca.fourthreethreefour.commands.EnableModule;
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoidGroup;
-import edu.first.module.actuators.Drivetrain;
+import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
-import edu.first.module.actuators.DualActionSolenoidModule;
-import edu.first.module.actuators.DualActionSolenoidModuleGroup;
-import edu.first.module.actuators.VictorModule;
-import edu.first.module.actuators.VictorModuleGroup;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
-import edu.first.module.subsystems.SubsystemBuilder;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
+
+	private final Subsystem AUTO_MODULES = new Subsystem(new Module[] {
+		drive, climber, unload, wipers 
+	});
 	
-	VictorModule //TODO get the actual channels
-		left1 = new VictorModule(0), 
-		left2 = new VictorModule(1),
-		left3 = new VictorModule(2), 
-		
-		right1 = new VictorModule(3),
-		right2 = new VictorModule(4),
-		right3 = new VictorModule(5);
+	private final Subsystem TELEOP_MODULES = new Subsystem(new Module[] {
+		drive, climber, unload, unloadLimitSwitch, wipers, controllers
+	});
 	
-	VictorModuleGroup left = new VictorModuleGroup(new VictorModule[] { left1, left2, left3 });
-	VictorModuleGroup right = new VictorModuleGroup(new VictorModule[] { right1, right2, right3 });
-	
-	Drivetrain drivetrain = new Drivetrain(left, right);
-	
-	XboxController controller1 = new XboxController(0);
-	XboxController controller2 = new XboxController(1);
-	
-	DualActionSolenoidModule unload1 = new DualActionSolenoidModule(0, 1);
-	DualActionSolenoidModule unload2 = new DualActionSolenoidModule(2, 3);
-	
-	DualActionSolenoidModuleGroup unload = new DualActionSolenoidModuleGroup(new DualActionSolenoidModule[] { unload1, unload2 });
-	
-	Subsystem ALL_MODULES = new SubsystemBuilder()
-			.add(controller1)
-			.add(controller2)
-			.add(drivetrain)
-				.add(left)
-					.add(left1)
-					.add(left2)
-					.add(left3)
-				.add(right)
-					.add(right1)
-					.add(right2)
-					.add(right3)
-			.add(unload)
-				.add(unload1)
-				.add(unload2)
-			
-			.toSubsystem();
+	private final Subsystem ALL_MODULES = new Subsystem(new Module[] {
+		AUTO_MODULES, TELEOP_MODULES, wipersPID
+	});
 
 	public Robot(String name) {
 		super(name);
@@ -66,22 +36,28 @@ public class Robot extends IterativeRobotAdapter {
 		controller1.addDeadband(XboxController.RIGHT_FROM_MIDDLE, 0.15);
 		
 		controller1.addAxisBind(
-				drivetrain.getTank(
+				drivetrain.getArcade(
 						controller1.getLeftDistanceFromMiddle(), 
 						controller1.getRightDistanceFromMiddle()));
 		
-		controller2.addWhenPressed(XboxController.B, new ReverseDualActionSolenoidGroup(unload)); //TODO see if this actually does anything
+		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoidGroup(unloadSolenoids)); //TODO see if this actually does anything
+		controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
+		
+		//TODO get setpoint for PID
+		controller2.addWhenPressed(XboxController.B, new EnableModule(wipersPID));
+		controller2.addWhenReleased(XboxController.B, new DisableModule(wipersPID));
+
 	}
 	
 	@Override
 	public void initAutonomous() {
-		ALL_MODULES.enable();
+		AUTO_MODULES.enable();
+		unloadSolenoids.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
 	public void initTeleoperated() {
 		ALL_MODULES.enable();
-		unload.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
@@ -93,5 +69,7 @@ public class Robot extends IterativeRobotAdapter {
 	public void periodicTeleoperated() {
 		controller1.doBinds();
 		controller2.doBinds();
+		
+		SmartDashboard.putBoolean("Has Gear", unloadLimitSwitch.getPosition());
 	}
 }

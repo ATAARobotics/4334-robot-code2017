@@ -2,7 +2,7 @@ package ca.fourthreethreefour; //ca.4334 isn't an acceptable Java package identi
 
 import ca.fourthreethreefour.commands.DisableModule;
 import ca.fourthreethreefour.commands.EnableModule;
-import ca.fourthreethreefour.commands.ReverseDualActionSolenoidGroup;
+import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.joysticks.XboxController;
@@ -39,8 +39,8 @@ public class Robot extends IterativeRobotAdapter {
 				drivetrain.getArcade(
 						controller1.getLeftDistanceFromMiddle(), 
 						controller1.getRightDistanceFromMiddle()));
-		
-		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoidGroup(unloadSolenoids)); //TODO see if this actually does anything
+
+		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid));
 		controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
 		
 		//TODO get setpoint for PID
@@ -52,12 +52,12 @@ public class Robot extends IterativeRobotAdapter {
 	@Override
 	public void initAutonomous() {
 		AUTO_MODULES.enable();
-		unloadSolenoids.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
 	public void initTeleoperated() {
 		ALL_MODULES.enable();
+		unloadSolenoid.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override

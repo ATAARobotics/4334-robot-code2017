@@ -1,10 +1,10 @@
 package edu.first.main;
 
+import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Climber;
 import ca.fourthreethreefour.subsystems.Controllers;
 import ca.fourthreethreefour.subsystems.Drive;
 import ca.fourthreethreefour.subsystems.Settings;
-import ca.fourthreethreefour.subsystems.Unload;
 import ca.fourthreethreefour.subsystems.Wipers;
 
 /**
@@ -47,5 +47,5 @@ import ca.fourthreethreefour.subsystems.Wipers;
  * @since May 07 13
  * @author Joel Gallant
  */
-public interface Constants extends Drive, Climber, Unload, Wipers, Controllers, Settings {
+public interface Constants extends Drive, Climber, Bucket, Wipers, Controllers, Settings {
 }

@@ -9,41 +9,43 @@ import java.util.Properties;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class SettingsFile extends Properties {
-	private static final long serialVersionUID = -6308390915164135156L;
-	
-	DriverStation driverStation = DriverStation.getInstance();
-	
-	public SettingsFile(File file) {
-		try {
-			load(new FileInputStream(file));
-		} catch (FileNotFoundException fileNotFound) {
-			DriverStation.reportError("File not found", false);
-		} catch (IOException IOException) {
-			DriverStation.reportWarning("I/O Exception", false);
-		}
-	}
-	
-	int getIntProperty(String key, int defaultValue) {
-		if (stringPropertyNames().contains(key)) {
-			return Integer.parseInt(getProperty(key));
-		} else {
-			return defaultValue;
-		}
-	}
+    private static final long serialVersionUID = -6308390915164135156L;
 
-	double getDoubleProperty(String key, double defaultValue) {
-		if (stringPropertyNames().contains(key)) {
-			return Double.parseDouble(getProperty(key));
-		} else {
-			return defaultValue;
-		}
-	}
+    DriverStation driverStation = DriverStation.getInstance();
 
-	boolean getBooleanProperty(String key, boolean defaultValue) {
-		if (stringPropertyNames().contains(key)) {
-			return Boolean.parseBoolean(getProperty(key));
-		} else {
-			return defaultValue;
-		}
-	}
+    public SettingsFile(File file) {
+        try {
+            load(new FileInputStream(file));
+        } catch (FileNotFoundException err) {
+            DriverStation.reportError("File not found", false);
+            err.printStackTrace();
+        } catch (IOException err) {
+            DriverStation.reportWarning("I/O Exception", false);
+            err.printStackTrace();
+        }
+    }
+
+    int getIntProperty(String key, int defaultValue) {
+        if (stringPropertyNames().contains(key)) {
+            return Integer.parseInt(getProperty(key));
+        } else {
+            return defaultValue;
+        }
+    }
+
+    double getDoubleProperty(String key, double defaultValue) {
+        if (stringPropertyNames().contains(key)) {
+            return Double.parseDouble(getProperty(key));
+        } else {
+            return defaultValue;
+        }
+    }
+
+    boolean getBooleanProperty(String key, boolean defaultValue) {
+        if (stringPropertyNames().contains(key)) {
+            return Boolean.parseBoolean(getProperty(key));
+        } else {
+            return defaultValue;
+        }
+    }
 }

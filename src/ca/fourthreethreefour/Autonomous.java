@@ -1,35 +1,43 @@
 package ca.fourthreethreefour;
 
 import ca.fourthreethreefour.subsystems.Drive;
-import ca.fourthreethreefour.subsystems.Unload;
-import edu.first.module.actuators.DualActionSolenoid.Direction;
+import edu.first.commands.CommandGroup;
+import edu.first.commands.common.LoopingCommand;
+import edu.first.commands.common.WaitCommand;
+import edu.first.module.actuators.Drivetrain;
 
-public class Autonomous implements Runnable {
-	
-	int autoLoopCounter = 0; //TODO use encoders instead of this counter
+public class Autonomous extends CommandGroup implements Drive {
+    public Autonomous() {
+        appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 1000L));
+        appendSequential(new WaitCommand(1));
+    }
 
-	@Override
-	public void run() {
-		Unload.unloadSolenoid.set(Direction.LEFT);
-		boolean hasDeployed = false;
-		
-		while(autoLoopCounter <= 150) {
-		Drive.drivetrain.drive(0.5, 0);
-		autoLoopCounter++;
-		}
-		
-		if((autoLoopCounter >= 150) && (hasDeployed = false)) {
-			Unload.unloadSolenoid.reverse();
-			hasDeployed = true;
-		} else {
-			
-		}
-		
-		while((autoLoopCounter <= 200) && (autoLoopCounter >= 150)) {
-			Drive.drivetrain.drive(-0.5, 0);
-			autoLoopCounter++;
-		}
-		
-	}
+    class TimedDrive extends LoopingCommand {
 
+        private Drivetrain drive;
+        private double left, right;
+        private long durationMS;
+        private long start = 0;
+
+        public TimedDrive(Drivetrain drive, double left, double right, long durationMS) {
+            this.drive = drive;
+            this.left = left;
+            this.right = right;
+            this.durationMS = durationMS;
+        }
+
+        @Override
+        public boolean continueLoop() {
+            return (System.currentTimeMillis() - start) < durationMS;
+        }
+
+        @Override
+        public void runLoop() {
+            if (start == 0) {
+                start = System.currentTimeMillis();
+            }
+
+            drive.tankDrive(left, right);
+        }
+    }
 }

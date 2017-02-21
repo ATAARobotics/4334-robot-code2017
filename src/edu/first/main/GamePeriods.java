@@ -45,7 +45,7 @@ public final class GamePeriods extends IterativeRobot {
      */
     public GamePeriods() {
         // Init robot mode here so that static initializing doesn't interfere with wpi code
-        robotMode = new SafeRobotMode(new Robot("name")); //TODO name the robot
+        robotMode = new SafeRobotMode(new Robot());
     }
 
     /**

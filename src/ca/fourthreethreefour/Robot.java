@@ -1,92 +1,86 @@
-package ca.fourthreethreefour; //ca.4334 isn't an acceptable Java package identifier so typing out the numbers will work I guess
+package ca.fourthreethreefour;
 
-import ca.fourthreethreefour.commands.DisableModule;
-import ca.fourthreethreefour.commands.EnableModule;
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
-import ca.fourthreethreefour.commands.RunPID;
-import ca.fourthreethreefour.commands.RunServo;
-import ca.fourthreethreefour.commands.RunSpeedController;
-import edu.first.identifiers.Function;
+import edu.first.command.Commands;
+import edu.first.commands.common.SetOutput;
+import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
+import edu.first.module.actuators.DualActionSolenoid.Direction;
+import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 
-	private final Subsystem AUTO_MODULES = new Subsystem(new Module[] {
-		drive, climber, unload, wipers 
-	});
-	
-	private final Subsystem TELEOP_MODULES = new Subsystem(new Module[] {
-		drive, climber, unload, unloadLimitSwitch, wipers, controllers
-	});
-	
-	private final Subsystem ALL_MODULES = new Subsystem(new Module[] {
-		AUTO_MODULES, TELEOP_MODULES, wipersPID
-	});
+    private final Subsystem AUTO_MODULES = new Subsystem(
+            new Module[] { drive, climber, bucket, wipers });
 
-	public Robot(String name) {
-		super(name);
-	}
+    private final Subsystem TELEOP_MODULES = new Subsystem(
+            new Module[] { drive, climber, bucket, bucketSwitch, wipers, controllers });
 
-	@Override
-	public void init() {
-		ALL_MODULES.init();
-		
-		controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
-		controller1.addDeadband(XboxController.RIGHT_X, 0.20);
-		controller1.invertAxis(XboxController.RIGHT_X);
-		controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, new Function() {
-			@Override
-			public double F(double in) {
-				return in > 0 ? in * in : -(in * in);
-			}
-		});
-		
-		controller1.addAxisBind(
-				drivetrain.getArcade(
-						controller1.getLeftDistanceFromMiddle(), 
-						controller1.getRightX()));
+    private final Subsystem ALL_MODULES = new Subsystem(
+            new Module[] { AUTO_MODULES, TELEOP_MODULES });
 
-		controller1.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid));
-		controller1.addWhilePressed(XboxController.B, new RunSpeedController(wiper1, 0.5));
-		controller1.addWhilePressed(XboxController.B, new RunSpeedController(wiper2, 0.5));
-		controller1.addWhilePressed(XboxController.X, new RunSpeedController(wiper1, -0.5));
-		controller1.addWhilePressed(XboxController.X, new RunSpeedController(wiper2, -0.5));
-		controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
-		
-		//TODO get setpoint for PID and put it in Settings
-		//controller2.addWhenPressed(XboxController.B, new RunPID(wiper1PID));
-		//controller2.addWhenPressed(XboxController.B, new RunPID(wiper2PID));
-		//controller2.addWhenReleased(XboxController.B, new DisableModule(wiper1PID));
-		//controller2.addWhenReleased(XboxController.B, new DisableModule(wiper2PID));
+    public Robot() {
+        super("ATA 2017");
+    }
 
-	}
-	
-	@Override
-	public void initAutonomous() {
-		AUTO_MODULES.enable();
-	}
-	
-	@Override
-	public void initTeleoperated() {
-		ALL_MODULES.enable();
-		unloadSolenoid.set(DualActionSolenoid.Direction.LEFT);
-	}
-	
-	@Override
-	public void endTeleoperated() {
-		ALL_MODULES.disable();
-	}
-	
-	@Override
-	public void periodicTeleoperated() {
-		controller1.doBinds();
-		//controller2.doBinds();
-		
-		//SmartDashboard.putBoolean("Has Gear", unloadLimitSwitch.getPosition());
-	}
+    @Override
+    public void init() {
+        ALL_MODULES.init();
+
+        controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
+        controller1.addDeadband(XboxController.RIGHT_X, 0.20);
+        controller1.invertAxis(XboxController.RIGHT_X);
+        controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, drivingFunction);
+
+        controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(),
+                                                 controller1.getRightX()) {
+            @Override
+            public void doBind(double speed, double turn) {
+                turn += (speed > 0) ? DRIVE_COMPENSATION : -DRIVE_COMPENSATION;
+                drivetrain.arcadeDrive(speed, turn);
+            }
+        });
+
+        controller1.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(bucketSolenoid));
+        controller1.addWhilePressed(XboxController.B, new SetOutput(wiper1, 0.5));
+        controller1.addWhilePressed(XboxController.B, new SetOutput(wiper2, -0.5));
+        controller1.addWhilePressed(XboxController.X, new SetOutput(wiper1, 0.5));
+        controller1.addWhilePressed(XboxController.X, new SetOutput(wiper2, -0.5));
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
+    }
+
+    @Override
+    public void initAutonomous() {
+        AUTO_MODULES.enable();
+        
+        Commands.run(new Autonomous());
+    }
+    
+    @Override
+    public void endAutonomous() {
+        AUTO_MODULES.disable();
+    }
+
+    @Override
+    public void initTeleoperated() {
+        TELEOP_MODULES.enable();
+        if (bucketSolenoid.get() == Direction.OFF) {
+            bucketSolenoid.set(DualActionSolenoid.Direction.LEFT);
+        }
+    }
+
+    @Override
+    public void periodicTeleoperated() {
+        controller1.doBinds();
+        controller2.doBinds();
+    }
+
+    @Override
+    public void endTeleoperated() {
+        TELEOP_MODULES.disable();
+    }
 }

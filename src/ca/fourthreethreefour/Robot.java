@@ -3,6 +3,9 @@ package ca.fourthreethreefour; //ca.4334 isn't an acceptable Java package identi
 import ca.fourthreethreefour.commands.DisableModule;
 import ca.fourthreethreefour.commands.EnableModule;
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
+import ca.fourthreethreefour.commands.RunPID;
+import ca.fourthreethreefour.commands.RunServo;
+import edu.first.identifiers.Function;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.joysticks.XboxController;
@@ -32,20 +35,29 @@ public class Robot extends IterativeRobotAdapter {
 	public void init() {
 		ALL_MODULES.init();
 		
-		controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.15);
-		controller1.addDeadband(XboxController.RIGHT_FROM_MIDDLE, 0.15);
+		controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
+		controller1.addDeadband(XboxController.RIGHT_X, 0.20);
+		controller1.invertAxis(XboxController.RIGHT_X);
+		controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, new Function() {
+			@Override
+			public double F(double in) {
+				return in > 0 ? in * in : -(in * in);
+			}
+		});
 		
 		controller1.addAxisBind(
 				drivetrain.getArcade(
 						controller1.getLeftDistanceFromMiddle(), 
-						controller1.getRightDistanceFromMiddle()));
+						controller1.getRightX()));
 
-		controller2.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid));
-		controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
+		controller1.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid));
+		//controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
 		
-		//TODO get setpoint for PID
-		controller2.addWhenPressed(XboxController.B, new EnableModule(wipersPID));
-		controller2.addWhenReleased(XboxController.B, new DisableModule(wipersPID));
+		//TODO get setpoint for PID and put it in Settings
+		//controller2.addWhenPressed(XboxController.B, new RunPID(wiper1PID));
+		//controller2.addWhenPressed(XboxController.B, new RunPID(wiper2PID));
+		//controller2.addWhenReleased(XboxController.B, new DisableModule(wiper1PID));
+		//controller2.addWhenReleased(XboxController.B, new DisableModule(wiper2PID));
 
 	}
 	
@@ -68,8 +80,8 @@ public class Robot extends IterativeRobotAdapter {
 	@Override
 	public void periodicTeleoperated() {
 		controller1.doBinds();
-		controller2.doBinds();
+		//controller2.doBinds();
 		
-		SmartDashboard.putBoolean("Has Gear", unloadLimitSwitch.getPosition());
+		//SmartDashboard.putBoolean("Has Gear", unloadLimitSwitch.getPosition());
 	}
 }

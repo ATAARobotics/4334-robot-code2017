@@ -23,7 +23,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 /*
  * driveSpeed = 0.43
- * foo = name
  * 1-CommandName:(0.5, -0.5, 1000L)
  * 2-OtherCommand:(0.5, driveSpeed, 1000L)
  * 3-Command:1
@@ -366,7 +365,7 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
                 this.concurrent = false;
                 this.name = keyname;
             }
-
+            
             String inner = arguments;
             if (arguments.contains("(") && arguments.contains(")")) {
                 inner = arguments.substring(arguments.indexOf('(') + 1, arguments.indexOf(')'));

@@ -7,11 +7,11 @@ import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.settings.AutoFile;
 import edu.first.command.Command;
 import edu.first.command.Commands;
+import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
 import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
-import edu.first.module.joysticks.BindingJoystick;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
@@ -37,18 +37,19 @@ public class Robot extends IterativeRobotAdapter {
             throw new Error("No ROBOT_TYPE set, please set a robot type in the settings file");
         }
         
-        if(ROBOT_TYPE == "Practice") {
+        if(ROBOT_TYPE == "Competition") {
             throw new Error("Wrong code deploy, dummy");
         }
 
         ALL_MODULES.init();
         drivetrain.setExpiration(0.1);
+        drivetrain.setReversed(true);
+//        allianceSwitch.init();
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
         controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);
 
         controller1.addDeadband(XboxController.RIGHT_X, 0.20);
-        controller1.invertAxis(XboxController.RIGHT_X);
         controller1.changeAxis(XboxController.RIGHT_X, turnFunction);
         
         if (MANUAL_CONTROL) {
@@ -82,11 +83,10 @@ public class Robot extends IterativeRobotAdapter {
                 }
             });
         }
-        
 
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
     }
     
     private Command autoCommand;

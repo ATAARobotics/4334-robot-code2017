@@ -4,7 +4,7 @@ import edu.first.command.Command;
 import edu.first.module.actuators.ServoModule;
 
 /**
- * Sets the specified {@link ServoModule} to 0.5.
+ * Sets the specified {@link ServoModule} to the value provided.
  * @author Satan
  * @since 1867
  */

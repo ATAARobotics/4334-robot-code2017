@@ -5,6 +5,7 @@ import ca.fourthreethreefour.commands.EnableModule;
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.commands.RunPID;
 import ca.fourthreethreefour.commands.RunServo;
+import ca.fourthreethreefour.commands.RunSpeedController;
 import edu.first.identifiers.Function;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
@@ -51,7 +52,11 @@ public class Robot extends IterativeRobotAdapter {
 						controller1.getRightX()));
 
 		controller1.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(unloadSolenoid));
-		//controller2.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
+		controller1.addWhilePressed(XboxController.B, new RunSpeedController(wiper1, 0.5));
+		controller1.addWhilePressed(XboxController.B, new RunSpeedController(wiper2, 0.5));
+		controller1.addWhilePressed(XboxController.X, new RunSpeedController(wiper1, -0.5));
+		controller1.addWhilePressed(XboxController.X, new RunSpeedController(wiper2, -0.5));
+		controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
 		
 		//TODO get setpoint for PID and put it in Settings
 		//controller2.addWhenPressed(XboxController.B, new RunPID(wiper1PID));

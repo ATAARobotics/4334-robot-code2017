@@ -18,10 +18,17 @@ public interface Drive extends Settings {
 
     Drivetrain drivetrain = new Drivetrain(new InversedSpeedController(left), right);
 
-    Function drivingFunction = new Function() {
+    Function speedFunction = new Function() {
         @Override
         public double F(double in) {
             return in > 0 ? in * in : -(in * in);
+        }
+    };
+    
+    Function turnFunction = new Function() {
+        @Override
+        public double F(double in) {
+            return in > 0 ? Math.pow(in, TURN_CURVE) : -Math.pow(in, TURN_CURVE);
         }
     };
 

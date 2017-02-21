@@ -32,9 +32,11 @@ public class Robot extends IterativeRobotAdapter {
         ALL_MODULES.init();
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
+        controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);
+
         controller1.addDeadband(XboxController.RIGHT_X, 0.20);
         controller1.invertAxis(XboxController.RIGHT_X);
-        controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, drivingFunction);
+        controller1.changeAxis(XboxController.RIGHT_X, turnFunction);
 
         controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(),
                                                  controller1.getRightX()) {

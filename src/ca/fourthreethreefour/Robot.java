@@ -64,12 +64,12 @@ public class Robot extends IterativeRobotAdapter {
 	@Override
 	public void initAutonomous() {
 		AUTO_MODULES.enable();
-		unloadSolenoid.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override
 	public void initTeleoperated() {
 		ALL_MODULES.enable();
+		unloadSolenoid.set(DualActionSolenoid.Direction.LEFT);
 	}
 	
 	@Override

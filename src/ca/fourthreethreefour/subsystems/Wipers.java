@@ -8,17 +8,16 @@ import edu.first.module.subsystems.Subsystem;
 
 public interface Wipers extends Settings {
 
-	VictorModule //TODO get ports from external file
-		wiper1 = new VictorModule(8),
-		wiper2 = new VictorModule(9);
+	VictorModule
+		wiper1 = new VictorModule(WIPER_1),
+		wiper2 = new VictorModule(WIPER_2);
 	
 	/**
 	 * Potentiometers for wipers.
 	 */
 	AnalogInput 
-		wiper1Pot = new AnalogInput(0),
-		wiper2Pot = new AnalogInput(1);
-	
+		wiper1Pot = new AnalogInput(WIPER_1_POTENTIOMETER),
+		wiper2Pot = new AnalogInput(WIPER_2_POTENTIOMETER);
 
 	Subsystem wipers = new Subsystem(new Module[] { 
 			wiper1, wiper2, wiper1Pot, wiper2Pot

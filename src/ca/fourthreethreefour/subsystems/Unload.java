@@ -8,7 +8,7 @@ import edu.first.module.subsystems.Subsystem;
 public interface Unload extends Settings {
 
 	DualActionSolenoidModule //TODO get ports from external file
-		unloadSolenoid = new DualActionSolenoidModule(0, 1);
+		unloadSolenoid = new DualActionSolenoidModule(UNLOAD_SOLENOID_PORT_1, UNLOAD_SOLENOID_PORT_2);
 	/**
 	 * Gear manipulator.
 	 */
@@ -19,5 +19,5 @@ public interface Unload extends Settings {
 	/**
 	 * Limit switch for the gear manipulator. Determines if the robot is holding a gear or not.
 	 */
-	DigitalInput unloadLimitSwitch = new DigitalInput(0); //TODO get actual channel
+	DigitalInput unloadLimitSwitch = new DigitalInput(UNLOAD_DIGITAL_INPUT); //TODO get actual channel
 }

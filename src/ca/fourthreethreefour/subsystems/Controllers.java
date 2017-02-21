@@ -7,8 +7,8 @@ import edu.first.module.subsystems.Subsystem;
 public interface Controllers extends Settings {
 	
 	XboxController 
-		controller1 = new XboxController(0),
-		controller2 = new XboxController(1);
+		controller1 = new XboxController(CONTROLLER_1),
+		controller2 = new XboxController(CONTROLLER_2);
 
 	Subsystem controllers = new Subsystem(new Module[] { 
 			controller1, controller2

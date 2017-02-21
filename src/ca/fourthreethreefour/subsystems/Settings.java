@@ -1,31 +1,29 @@
 package ca.fourthreethreefour.subsystems;
 
-import java.util.Properties;
+import java.io.File;
 
-public class Settings extends Properties {
-	private static final long serialVersionUID = -6308390915164135156L;
+public interface Settings {
+	SettingsFile settingsFile = new SettingsFile(new File("/settings.txt"));
+
+	//ports
+	int DRIVE_RIGHT_1 = settingsFile.getIntProperty("DRIVE_RIGHT_1", 0);
+	int DRIVE_RIGHT_2 = settingsFile.getIntProperty("DRIVE_RIGHT_2", 1);
+	int DRIVE_RIGHT_3 = settingsFile.getIntProperty("DRIVE_RIGHT_3", 2);
+	int DRIVE_LEFT_1 = settingsFile.getIntProperty("DRIVE_LEFT_1", 3);
+	int DRIVE_LEFT_2 = settingsFile.getIntProperty("DRIVE_LEFT_2", 4);
+	int DRIVE_LEFT_3 = settingsFile.getIntProperty("DRIVE_LEFT_3", 5);
+	int CLIMBER_1 = settingsFile.getIntProperty("CLIMBER_1", 6);
+	int CLIMBER_2 = settingsFile.getIntProperty("CLIMBER_2", 7);
+	int WIPER_1 = settingsFile.getIntProperty("WIPER_1", 8);
+	int WIPER_2 = settingsFile.getIntProperty("WIPER_2", 9);
+	int WIPER_1_POTENTIOMETER = settingsFile.getIntProperty("WIPER_1_POTENTIOMETER", 0);
+	int WIPER_2_POTENTIOMETER = settingsFile.getIntProperty("WIPER_1_POTENTIOMETER", 1);
+	int UNLOAD_SOLENOID_PORT_1 = settingsFile.getIntProperty("UNLOAD_SOLENOID_PORT_1", 0);
+	int UNLOAD_SOLENOID_PORT_2 = settingsFile.getIntProperty("UNLOAD_SOLENOID_PORT_2", 1);
+	int UNLOAD_DIGITAL_INPUT = settingsFile.getIntProperty("UNLOAD_DIGITAL_INPUT", 0);
+	int CONTROLLER_1 = settingsFile.getIntProperty("CONTROLLER_1", 0);
+	int CONTROLLER_2 = settingsFile.getIntProperty("CONTROLLER_1", 1);
 	
-	int getIntProperty(String key, int defaultValue) {
-		if (stringPropertyNames().contains(key)) {
-			return Integer.parseInt(getProperty(key));
-		} else {
-			return defaultValue;
-		}
-	}
-
-	double getDoubleProperty(String key, double defaultValue) {
-		if (stringPropertyNames().contains(key)) {
-			return Double.parseDouble(getProperty(key));
-		} else {
-			return defaultValue;
-		}
-	}
-
-	boolean getBooleanProperty(String key, boolean defaultValue) {
-		if (stringPropertyNames().contains(key)) {
-			return Boolean.parseBoolean(getProperty(key));
-		} else {
-			return defaultValue;
-		}
-	}
+	//not ports
+	
 }

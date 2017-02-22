@@ -10,6 +10,7 @@ public interface Settings {
     
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);
     double TURN_CURVE = settingsFile.getDoubleProperty("TURN_CURVE", 1.5);
+    double TURN_CONSTANT = settingsFile.getDoubleProperty("TURN_CONSTANT", 1);
 
     int DRIVE_RIGHT_1 = settingsFile.getIntProperty("DRIVE_RIGHT_1", 0);
     int DRIVE_RIGHT_2 = settingsFile.getIntProperty("DRIVE_RIGHT_2", 1);

@@ -20,7 +20,7 @@ public class SettingsFile extends Properties {
             DriverStation.reportError("File not found", false);
             err.printStackTrace();
         } catch (IOException err) {
-            DriverStation.reportWarning("I/O Exception", false);
+            DriverStation.reportError("I/O Exception", false);
             err.printStackTrace();
         }
     }

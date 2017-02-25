@@ -1,7 +1,9 @@
 package ca.fourthreethreefour;
 
+import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Drive;
+import ca.fourthreethreefour.subsystems.GearGuard;
 import edu.first.command.Command;
 import edu.first.commands.CommandGroup;
 import edu.first.commands.common.LoopingCommand;
@@ -11,11 +13,13 @@ import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
 
 public class Autonomous extends CommandGroup implements Drive, Bucket {
-    public Autonomous() { //TODO fix this, add switch case for multiple autos (this is center)
-        appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 1000L)); 
-        appendSequential(new WaitCommand(1));
+    public Autonomous() { //TODO test times, add switch case for multiple autos (this is center)
+        appendSequential(new McBukkit(GearGuard.gearGuard));
         appendConcurrent(new McBukkit(bucketSolenoid));
+        appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 1000L));
         appendSequential(new WaitCommand(1));
+        appendConcurrent(new ReverseDualActionSolenoid(GearGuard.gearGuard));
+        appendSequential(new ReverseDualActionSolenoid(bucketSolenoid));
         appendSequential(new TimedDrive(drivetrain, -0.2, -0.2, 1000L));
         appendSequential(new TimedDrive(drivetrain, 0.4, 0.2, 500L));
         appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 500L));
@@ -39,15 +43,16 @@ public class Autonomous extends CommandGroup implements Drive, Bucket {
         
         @Override
         public boolean continueLoop() {
+            if (start == 0) {
+                start = System.currentTimeMillis();
+                return durationMS != 0;
+            }
+            
             return (System.currentTimeMillis() - start) < durationMS;
         }
 
         @Override
         public void runLoop() {
-            if (start == 0) {
-                start = System.currentTimeMillis();
-            }
-
             drive.tankDrive(left, right);
         }
     }
@@ -68,5 +73,5 @@ public class Autonomous extends CommandGroup implements Drive, Bucket {
         public void run() {
             bucketSolenoid.set(Direction.RIGHT);
         }
-      }
+    }
 }

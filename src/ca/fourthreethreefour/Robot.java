@@ -2,7 +2,6 @@ package ca.fourthreethreefour;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import edu.first.command.Commands;
-import edu.first.commands.common.SetOutput;
 import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
@@ -15,10 +14,10 @@ import edu.first.robot.IterativeRobotAdapter;
 public class Robot extends IterativeRobotAdapter {
 
     private final Subsystem AUTO_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, wipers });
+            new Module[] { drive, bucket, gearGuard });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, bucketSwitch, wipers, controllers });
+            new Module[] { drive, climber, bucket, gearGuard, controllers });
 
     private final Subsystem ALL_MODULES = new Subsystem(
             new Module[] { AUTO_MODULES, TELEOP_MODULES });
@@ -47,11 +46,8 @@ public class Robot extends IterativeRobotAdapter {
             }
         });
 
-        controller1.addWhenPressed(XboxController.A, new ReverseDualActionSolenoid(bucketSolenoid));
-        controller1.addWhilePressed(XboxController.B, new SetOutput(wiper1, 0.5));
-        controller1.addWhilePressed(XboxController.B, new SetOutput(wiper2, -0.5));
-        controller1.addWhilePressed(XboxController.X, new SetOutput(wiper1, 0.5));
-        controller1.addWhilePressed(XboxController.X, new SetOutput(wiper2, -0.5));
+        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
+        controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
     }
 
@@ -72,6 +68,9 @@ public class Robot extends IterativeRobotAdapter {
         TELEOP_MODULES.enable();
         if (bucketSolenoid.get() == Direction.OFF) {
             bucketSolenoid.set(DualActionSolenoid.Direction.LEFT);
+        }
+        if (gearGuard.get() == Direction.OFF) {
+            gearGuard.set(DualActionSolenoid.Direction.LEFT);
         }
     }
 

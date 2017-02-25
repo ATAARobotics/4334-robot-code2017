@@ -20,10 +20,8 @@ public interface Settings {
     int DRIVE_LEFT_3 = settingsFile.getIntProperty("DRIVE_LEFT_3", 5);
     int CLIMBER_1 = settingsFile.getIntProperty("CLIMBER_1", 8);
     int CLIMBER_2 = settingsFile.getIntProperty("CLIMBER_2", 9);
-    int WIPER_1 = settingsFile.getIntProperty("WIPER_1", 6);
-    int WIPER_2 = settingsFile.getIntProperty("WIPER_2", 7);
-    int WIPER_1_POTENTIOMETER = settingsFile.getIntProperty("WIPER_1_POTENTIOMETER", 0);
-    int WIPER_2_POTENTIOMETER = settingsFile.getIntProperty("WIPER_2_POTENTIOMETER", 1);
+    int GEARGUARD_1 = settingsFile.getIntProperty("GEARGUARD_1", 2);
+    int GEARGUARD_2 = settingsFile.getIntProperty("GEARGUARD_2", 3);
     int BUCKET_SOLENOID_PORT_1 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_1", 0);
     int BUCKET_SOLENOID_PORT_2 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_2", 1);
     int BUCKET_SWITCH = settingsFile.getIntProperty("BUCKET_SWITCH", 0);

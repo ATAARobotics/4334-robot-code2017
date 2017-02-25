@@ -78,6 +78,13 @@ public class Robot extends IterativeRobotAdapter {
     public void periodicTeleoperated() {
         controller1.doBinds();
         controller2.doBinds();
+        
+        //TODO test dis
+        if(gearGuard.get() == Direction.LEFT && bucketSolenoid.get() == Direction.LEFT) {
+            indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
+        } else {
+            indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
+        }
     }
 
     @Override

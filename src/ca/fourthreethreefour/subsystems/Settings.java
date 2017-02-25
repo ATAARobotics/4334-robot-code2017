@@ -18,10 +18,14 @@ public interface Settings {
     int DRIVE_LEFT_1 = settingsFile.getIntProperty("DRIVE_LEFT_1", 3);
     int DRIVE_LEFT_2 = settingsFile.getIntProperty("DRIVE_LEFT_2", 4);
     int DRIVE_LEFT_3 = settingsFile.getIntProperty("DRIVE_LEFT_3", 5);
+    int DRIVE_ENCODER_1 = settingsFile.getIntProperty("DRIVE_ENCODER_1", 0); //TODO get defaults
+    int DRIVE_ENCODER_2 = settingsFile.getIntProperty("DRIVE_ENCODER_2", 1);
+    int DRIVE_GYRO = settingsFile.getIntProperty("DRIVE_GYRO", 0);
     int CLIMBER_1 = settingsFile.getIntProperty("CLIMBER_1", 8);
     int CLIMBER_2 = settingsFile.getIntProperty("CLIMBER_2", 9);
     int GEARGUARD_1 = settingsFile.getIntProperty("GEARGUARD_1", 2);
     int GEARGUARD_2 = settingsFile.getIntProperty("GEARGUARD_2", 3);
+    int INDICATOR = settingsFile.getIntProperty("INDICATOR", 0);
     int BUCKET_SOLENOID_PORT_1 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_1", 0);
     int BUCKET_SOLENOID_PORT_2 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_2", 1);
     int BUCKET_SWITCH = settingsFile.getIntProperty("BUCKET_SWITCH", 0);

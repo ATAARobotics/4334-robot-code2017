@@ -10,6 +10,7 @@ import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 
@@ -85,6 +86,8 @@ public class Robot extends IterativeRobotAdapter {
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
+        
+        SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
     }
 
     @Override

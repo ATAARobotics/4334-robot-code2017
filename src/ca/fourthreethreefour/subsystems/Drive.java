@@ -6,6 +6,9 @@ import edu.first.module.Module;
 import edu.first.module.actuators.Drivetrain;
 import edu.first.module.actuators.VictorModule;
 import edu.first.module.actuators.VictorModuleGroup;
+import edu.first.module.sensors.EncoderModule;
+import edu.first.module.sensors.EncoderModule.InputType;
+import edu.first.module.sensors.GyroscopeModule;
 import edu.first.module.subsystems.Subsystem;
 
 public interface Drive extends Settings {
@@ -17,6 +20,10 @@ public interface Drive extends Settings {
             new VictorModule(DRIVE_RIGHT_2), new VictorModule(DRIVE_RIGHT_3) });
 
     Drivetrain drivetrain = new Drivetrain(new InversedSpeedController(left), right);
+    
+    EncoderModule driveEncoder = new EncoderModule(DRIVE_ENCODER_1, DRIVE_ENCODER_2, InputType.DISTANCE);
+    
+    GyroscopeModule driveGyro = new GyroscopeModule(DRIVE_GYRO);
 
     Function speedFunction = new Function() {
         @Override

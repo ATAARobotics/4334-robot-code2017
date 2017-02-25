@@ -12,9 +12,9 @@ import edu.first.module.actuators.Drivetrain;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
 
-public class Autonomous extends CommandGroup implements Drive, Bucket {
+public class Autonomous extends CommandGroup implements Drive, Bucket, GearGuard {
     public Autonomous() { //TODO test times, add switch case for multiple autos (this is center)
-        appendSequential(new McBukkit(GearGuard.gearGuard));
+        appendSequential(new McBukkit(gearGuard));
         appendConcurrent(new WaitCommand(0.1));
         appendSequential(new McBukkit(bucketSolenoid));
         appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 1000L));

@@ -18,7 +18,7 @@ public class Robot extends IterativeRobotAdapter {
             new Module[] { drive, bucket, gearGuard });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, gearGuard, controllers });
+            new Module[] { drive, climber, bucket, gearGuard, indicator, controllers });
 
     private final Subsystem ALL_MODULES = new Subsystem(
             new Module[] { AUTO_MODULES, TELEOP_MODULES });
@@ -87,7 +87,7 @@ public class Robot extends IterativeRobotAdapter {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
         
-        SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
+        //SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
     }
 
     @Override

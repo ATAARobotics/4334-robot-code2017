@@ -4,28 +4,32 @@ import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Drive;
 import ca.fourthreethreefour.subsystems.GearGuard;
+import ca.fourthreethreefour.subsystems.Settings;
 import edu.first.command.Command;
 import edu.first.commands.CommandGroup;
 import edu.first.commands.common.LoopingCommand;
+import edu.first.commands.common.SetOutput;
 import edu.first.commands.common.WaitCommand;
 import edu.first.module.actuators.Drivetrain;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
 
-public class Autonomous extends CommandGroup implements Drive, Bucket, GearGuard {
+public class Autonomous extends CommandGroup implements Drive, Bucket, GearGuard, Settings {
     public Autonomous() { //TODO test times, add switch case for multiple autos (this is center)
         appendSequential(new McBukkit(gearGuard));
-        appendConcurrent(new WaitCommand(0.1));
+        appendSequential(new WaitCommand(0.5));
         appendSequential(new McBukkit(bucketSolenoid));
-        appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 1000L));
-        appendSequential(new WaitCommand(1));
-        appendConcurrent(new ReverseDualActionSolenoid(GearGuard.gearGuard));
+        appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1600L));
+        appendSequential(new SetOutput(drivetrain.getDriveStraight(), 0));
+        appendSequential(new WaitCommand(0.5));
+        appendSequential(new ReverseDualActionSolenoid(GearGuard.gearGuard));
+        appendSequential(new WaitCommand(1.4));
         appendSequential(new ReverseDualActionSolenoid(bucketSolenoid));
-        appendSequential(new TimedDrive(drivetrain, -0.2, -0.2, 1000L));
-        appendSequential(new TimedDrive(drivetrain, 0.4, 0.2, 500L));
+        appendSequential(new TimedDrive(drivetrain, -0.6, -0.2, 1000L));
         appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 500L));
-        appendSequential(new TimedDrive(drivetrain, 0.2, 0.4, 500L));
-        appendSequential(new TimedDrive(drivetrain, 0.2, 0.2, 1000L));
+        appendSequential(new TimedDrive(drivetrain, 0.3, 0.4, 2000L));
+        appendSequential(new TimedDrive(drivetrain, 0.6, 0.2, 500L)); //TODO make this turn left more
+        appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1000L));
     }
 
     class TimedDrive extends LoopingCommand {

@@ -29,6 +29,15 @@ public class Robot extends IterativeRobotAdapter {
 
     @Override
     public void init() {
+        
+        if(ROBOT_TYPE == "" ) {
+            throw new Error("No ROBOT_TYPE set, please set a robot type in the settings file");
+        }
+        
+        if(ROBOT_TYPE == "Practice") {
+            throw new Error("Wrong code deploy, dummy");
+        }
+        
         ALL_MODULES.init();
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);

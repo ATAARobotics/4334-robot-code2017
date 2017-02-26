@@ -5,7 +5,7 @@ import java.io.File;
 public interface Settings {
     SettingsFile settingsFile = new SettingsFile(new File("/settings.txt"));
 
-    String ROBOT_TYPE = settingsFile.getProperty("ROBOT_TYPE", "Competition");
+    String ROBOT_TYPE = settingsFile.getProperty("ROBOT_TYPE", "");
     String AUTO_TYPE = settingsFile.getProperty("AUTO_TYPE", "CenterMobile");
     
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);

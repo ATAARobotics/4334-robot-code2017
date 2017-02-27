@@ -37,7 +37,7 @@ public final class SafeRobotMode implements RobotMode {
     public void init() {
         try {
             mode.init();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -49,7 +49,7 @@ public final class SafeRobotMode implements RobotMode {
     public void initAutonomous() {
         try {
             mode.initAutonomous();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -61,7 +61,7 @@ public final class SafeRobotMode implements RobotMode {
     public void initTeleoperated() {
         try {
             mode.initTeleoperated();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -85,7 +85,7 @@ public final class SafeRobotMode implements RobotMode {
     public void initTest() {
         try {
             mode.initTest();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -109,7 +109,7 @@ public final class SafeRobotMode implements RobotMode {
     public void periodicTeleoperated() {
         try {
             mode.periodicTeleoperated();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -121,7 +121,7 @@ public final class SafeRobotMode implements RobotMode {
     public void periodicDisabled() {
         try {
             mode.periodicDisabled();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -133,7 +133,7 @@ public final class SafeRobotMode implements RobotMode {
     public void periodicTest() {
         try {
             mode.periodicTest();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -145,7 +145,7 @@ public final class SafeRobotMode implements RobotMode {
     public void endAutonomous() {
         try {
             mode.endAutonomous();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -157,7 +157,7 @@ public final class SafeRobotMode implements RobotMode {
     public void endTeleoperated() {
         try {
             mode.endTeleoperated();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -169,7 +169,7 @@ public final class SafeRobotMode implements RobotMode {
     public void endDisabled() {
         try {
             mode.endDisabled();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }
@@ -181,7 +181,7 @@ public final class SafeRobotMode implements RobotMode {
     public void endTest() {
         try {
             mode.endTest();
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Logger.getLogger(this).error("Error", t);
         }
     }

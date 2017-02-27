@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import edu.first.util.log.Logger;
 import edu.wpi.first.wpilibj.DriverStation;
 
 public class SettingsFile extends Properties {
@@ -24,11 +25,22 @@ public class SettingsFile extends Properties {
             err.printStackTrace();
         }
     }
+    
+    @Override
+    public String getProperty(String key, String defaultValue) {
+        if (containsKey(key)) {
+            return super.getProperty(key);
+        } else {
+            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
+            return defaultValue;
+        }
+    }
 
     int getIntProperty(String key, int defaultValue) {
         if (stringPropertyNames().contains(key)) {
             return Integer.parseInt(getProperty(key));
         } else {
+            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }
@@ -37,6 +49,7 @@ public class SettingsFile extends Properties {
         if (stringPropertyNames().contains(key)) {
             return Double.parseDouble(getProperty(key));
         } else {
+            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }
@@ -45,6 +58,7 @@ public class SettingsFile extends Properties {
         if (stringPropertyNames().contains(key)) {
             return Boolean.parseBoolean(getProperty(key));
         } else {
+            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }

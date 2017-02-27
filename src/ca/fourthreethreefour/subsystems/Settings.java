@@ -31,4 +31,6 @@ public interface Settings {
     int BUCKET_SWITCH = settingsFile.getIntProperty("BUCKET_SWITCH", 0);
     int CONTROLLER_1 = settingsFile.getIntProperty("CONTROLLER_1", 0);
     int CONTROLLER_2 = settingsFile.getIntProperty("CONTROLLER_2", 1);
+    int AUTO_SWITCH = settingsFile.getIntProperty("AUTO_SWITCH", 1);
+    int ALLIANCE_SWITCH = settingsFile.getIntProperty("ALLIANCE_SWITCH", 1);
 }

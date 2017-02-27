@@ -10,7 +10,6 @@ import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 
@@ -90,7 +89,7 @@ public class Robot extends IterativeRobotAdapter {
         controller2.doBinds();
         
         //TODO test dis
-        if(gearGuard.get() == Direction.LEFT && bucketSolenoid.get() == Direction.LEFT) {
+        if(gearGuard.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);

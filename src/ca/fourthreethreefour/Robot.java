@@ -2,6 +2,7 @@ package ca.fourthreethreefour;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import edu.first.command.Commands;
+import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;

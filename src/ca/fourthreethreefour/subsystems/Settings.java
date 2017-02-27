@@ -7,6 +7,7 @@ public interface Settings {
 
     String ROBOT_TYPE = settingsFile.getProperty("ROBOT_TYPE", "");
     String AUTO_TYPE = settingsFile.getProperty("AUTO_TYPE", "CenterMobile");
+    String ALLIANCE = settingsFile.getProperty("ALLIANCE", "Blue");
     
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);
     double TURN_CURVE = settingsFile.getDoubleProperty("TURN_CURVE", 1.5);
@@ -32,5 +33,4 @@ public interface Settings {
     int CONTROLLER_1 = settingsFile.getIntProperty("CONTROLLER_1", 0);
     int CONTROLLER_2 = settingsFile.getIntProperty("CONTROLLER_2", 1);
     int AUTO_SWITCH = settingsFile.getIntProperty("AUTO_SWITCH", 1);
-    int ALLIANCE_SWITCH = settingsFile.getIntProperty("ALLIANCE_SWITCH", 1);
 }

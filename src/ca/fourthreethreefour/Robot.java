@@ -10,6 +10,7 @@ import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 
@@ -17,7 +18,7 @@ public class Robot extends IterativeRobotAdapter {
             new Module[] { drive, bucket, gearGuard });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, gearGuard, indicator, controllers });
+            new Module[] { drive, driveEncoder, climber, bucket, gearGuard, indicator, controllers });
 
     private final Subsystem ALL_MODULES = new Subsystem(
             new Module[] { AUTO_MODULES, TELEOP_MODULES });
@@ -63,7 +64,7 @@ public class Robot extends IterativeRobotAdapter {
     public void initAutonomous() {
         AUTO_MODULES.enable();
         
-        Commands.run(new Autonomous());
+        Commands.run(new Right());
     }
     
     @Override
@@ -93,6 +94,8 @@ public class Robot extends IterativeRobotAdapter {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
         
+        SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
+        SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
         //SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
     }
 

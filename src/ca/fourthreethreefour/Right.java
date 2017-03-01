@@ -19,15 +19,16 @@ public class Right extends CommandGroup implements Drive, Bucket, GearGuard, Set
         appendSequential(new McBukkit(gearGuard));
         appendSequential(new WaitCommand(0.5));
         appendSequential(new McBukkit(bucketSolenoid));
-        appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1600L));
-        appendSequential(new TimedDrive(drivetrain, 0.2, 0.4, 600L));
-        appendSequential(new SetOutput(drivetrain.getDriveStraight(), 0));
+        appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1000L));
+        appendSequential(new TimedDrive(drivetrain, 0.4, -0.4, 340L));
+        appendSequential(new WaitCommand(0.25));
+        appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1550L));
         appendSequential(new WaitCommand(0.5));
         appendSequential(new ReverseDualActionSolenoid(GearGuard.gearGuard));
         appendSequential(new WaitCommand(1.4));
         appendSequential(new ReverseDualActionSolenoid(bucketSolenoid));
-        appendSequential(new TimedDrive(drivetrain, 0.4, 0.2, 600L));
-        appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1000L));
+        //appendSequential(new TimedDrive(drivetrain, 0.4, 0.2, 600L));
+        //appendSequential(new TimedDrive(drivetrain, 0.4, 0.4, 1000L));
     }
 
     class TimedDrive extends LoopingCommand {

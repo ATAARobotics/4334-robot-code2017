@@ -87,7 +87,6 @@ public class Robot extends IterativeRobotAdapter {
         controller1.doBinds();
         controller2.doBinds();
         
-        //TODO test dis
         if(gearGuard.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
         } else {

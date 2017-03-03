@@ -1,5 +1,6 @@
 package ca.fourthreethreefour.subsystems;
 
+import ca.fourthreethreefour.settings.Settings;
 import edu.first.module.Module;
 import edu.first.module.actuators.SpeedController;
 import edu.first.module.actuators.SpeedControllerGroup;

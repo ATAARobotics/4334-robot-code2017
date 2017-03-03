@@ -1,5 +1,6 @@
 package ca.fourthreethreefour.subsystems;
 
+import ca.fourthreethreefour.settings.Settings;
 import edu.first.module.sensors.DigitalInput;
 
 public interface Switches extends Settings {

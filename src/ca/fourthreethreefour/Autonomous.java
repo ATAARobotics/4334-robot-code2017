@@ -1,10 +1,10 @@
 package ca.fourthreethreefour;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
+import ca.fourthreethreefour.settings.Settings;
 import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Drive;
 import ca.fourthreethreefour.subsystems.GearGuard;
-import ca.fourthreethreefour.subsystems.Settings;
 import edu.first.command.Command;
 import edu.first.commands.CommandGroup;
 import edu.first.commands.common.LoopingCommand;

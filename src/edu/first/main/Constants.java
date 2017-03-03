@@ -1,10 +1,10 @@
 package edu.first.main;
 
+import ca.fourthreethreefour.settings.Settings;
 import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Climber;
 import ca.fourthreethreefour.subsystems.Controllers;
 import ca.fourthreethreefour.subsystems.Drive;
-import ca.fourthreethreefour.subsystems.Settings;
 import ca.fourthreethreefour.subsystems.GearGuard;
 
 /**

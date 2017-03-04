@@ -8,8 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ca.fourthreethreefour.subsystems.Bucket;
+import ca.fourthreethreefour.subsystems.Drive;
+import ca.fourthreethreefour.subsystems.GearGuard;
 import edu.first.command.Command;
 import edu.first.commands.CommandGroup;
+import edu.first.commands.common.LoopingCommand;
+import edu.first.commands.common.WaitCommand;
+import edu.first.module.actuators.DualActionSolenoid.Direction;
 
 /*
  * 1-CommandName:(0.5, -0.5, 1000L)
@@ -19,12 +25,29 @@ import edu.first.commands.CommandGroup;
  * add any custom commands in the static {} block below, look at
  * PrintCommand for an example
  */
-public class AutoFile extends SettingsFile {
+public class AutoFile extends SettingsFile implements Drive {
     private static final long serialVersionUID = 5658050910302255585L;
     public static final HashMap<String, RuntimeCommand> COMMANDS = new HashMap<>();
     
     static {
        COMMANDS.put("print", new PrintCommand());
+       COMMANDS.put("Print", new PrintCommand());
+       COMMANDS.put("drive", new DriveCommand());
+       COMMANDS.put("Drive", new DriveCommand());
+       COMMANDS.put("stop", new StopCommand());
+       COMMANDS.put("Stop", new StopCommand());
+       COMMANDS.put("oh god please stop", new StopCommand());
+       COMMANDS.put("hammertime", new StopCommand());
+       COMMANDS.put("wait", new Wait());
+       COMMANDS.put("Wait", new Wait());
+       COMMANDS.put("deploy", new DeployBucket());
+       COMMANDS.put("Deploy", new DeployBucket());
+       COMMANDS.put("retract", new RetractBucket());
+       COMMANDS.put("Retract", new RetractBucket());
+       COMMANDS.put("close", new CloseGuard());
+       COMMANDS.put("Close", new CloseGuard());
+       COMMANDS.put("open", new OpenGuard());
+       COMMANDS.put("Open", new OpenGuard());
     }
     
     private static class PrintCommand implements RuntimeCommand {
@@ -37,6 +60,131 @@ public class AutoFile extends SettingsFile {
                }
            };
        }
+    }
+    
+    private static class DriveCommand implements RuntimeCommand {
+        
+        long start = 0;
+
+        @Override
+        public LoopingCommand getCommand(List<String> args) {
+            double left = Double.parseDouble(args.get(0));
+            double right = Double.parseDouble(args.get(1));
+            
+            if (args.size() == 3) {
+                //drivetrain.makeTea(EARL_GREY, hot);
+            } else if (args.size() > 3) {
+                throw new IllegalStateException("Error in Drive: Too many arguments");
+            } else if (args.size() < 2) {
+                throw new IllegalStateException("Error in Drive: Not enough arguments");
+            }
+            
+            return new LoopingCommand() {
+                
+                @Override
+                public boolean continueLoop() {
+                    if (start == 0) {
+                        start = System.currentTimeMillis();
+                        return start != 0;
+                    } else if (args.size() == 3) {
+                        return System.currentTimeMillis() - start > Double.parseDouble(args.get(2));
+                    } else {
+                        return false;
+                    }
+                }
+
+                @Override
+                public void runLoop() {
+                    drivetrain.tankDrive(left, right);
+                }
+            };
+        }
+    }
+    
+    private static class StopCommand implements RuntimeCommand {
+
+        @Override
+        public Command getCommand(List<String> args) {
+            Double.parseDouble(args.get(0));
+            
+            return new Command() {
+
+                @Override
+                public void run() {
+                    drivetrain.stopMotor();
+                }
+            };
+        }
+    }
+    
+    private static class Wait implements RuntimeCommand {
+        
+        @Override
+        public Command getCommand(List<String> args) {
+            if (args.size() > 1) {
+                throw new IllegalStateException("Error in Wait: Too many arguments");
+            } else if (args.size() < 1) {
+                throw new IllegalStateException("Error in Wait: Not enough arguments");
+            } else {
+                return new WaitCommand(Double.parseDouble(args.get(0)));
+            }
+        }
+    }
+    
+    private static class DeployBucket implements RuntimeCommand {
+
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+
+                @Override
+                public void run() {
+                    Bucket.bucketSolenoid.set(Direction.RIGHT);
+                }
+            };
+        }
+    }
+    
+    private static class RetractBucket implements RuntimeCommand {
+
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+
+                @Override
+                public void run() {
+                    Bucket.bucketSolenoid.set(Direction.LEFT);
+                }
+            };
+        }
+    }
+    
+    private static class CloseGuard implements RuntimeCommand {
+
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+
+                @Override
+                public void run() {
+                    GearGuard.gearGuard.set(Direction.RIGHT);
+                }
+            };
+        }
+    }
+    
+    private static class OpenGuard implements RuntimeCommand {
+
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+
+                @Override
+                public void run() {
+                    GearGuard.gearGuard.set(Direction.LEFT);
+                }
+            };
+        }
     }
 
     public AutoFile(File file) {

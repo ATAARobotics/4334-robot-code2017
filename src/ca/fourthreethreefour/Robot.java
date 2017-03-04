@@ -56,23 +56,50 @@ public class Robot extends IterativeRobotAdapter {
             }
         });
 
-        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
+        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
     }
     
-    private Command auto;
+    private Command autoRedLeft;
+    private Command autoRedCenter;
+    private Command autoRedRight;
+    private Command autoBlueLeft;
+    private Command autoBlueCenter;
+    private Command autoBlueRight;
+    
 
     @Override
     public void periodicDisabled() {
-        auto = new AutoFile(new File("/auto.txt")).toCommand();
+        autoRedLeft = new AutoFile(new File("/auto_red_left.txt")).toCommand();
+        autoRedCenter = new AutoFile(new File("/auto_red_center.txt")).toCommand();
+        autoRedRight = new AutoFile(new File("/auto_red_right.txt")).toCommand();
+        autoBlueLeft = new AutoFile(new File("/auto_blue_left.txt")).toCommand();
+        autoBlueLeft = new AutoFile(new File("/auto_blue_center.txt")).toCommand();
+        autoBlueLeft = new AutoFile(new File("/auto_blue_right.txt")).toCommand();
     }
 
     @Override
     public void initAutonomous() {
         AUTO_MODULES.enable();
 
-        auto.run();
+        if (allianceSwitch.equals(0)) {
+            if (AUTO_TYPE.equalsIgnoreCase("center")) {
+                autoBlueCenter.run();
+            } else if (AUTO_TYPE.equalsIgnoreCase("left")) {
+                autoBlueLeft.run();
+            } else if (AUTO_TYPE.equalsIgnoreCase("right")) {
+                autoBlueRight.run();
+            }
+        } else if (allianceSwitch.equals(1)) {
+            if (AUTO_TYPE.equalsIgnoreCase("center")) {
+                autoRedCenter.run();
+            } else if (AUTO_TYPE.equalsIgnoreCase("left")) {
+                autoRedLeft.run();
+            } else if (AUTO_TYPE.equalsIgnoreCase("right")) {
+                autoRedRight.run();
+            }
+        }
     }
 
     @Override
@@ -96,7 +123,7 @@ public class Robot extends IterativeRobotAdapter {
         controller1.doBinds();
         controller2.doBinds();
 
-        if (gearGuard.get() == Direction.LEFT) {
+        if (gearGuard.get() == Direction.LEFT && bucketSolenoid.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);

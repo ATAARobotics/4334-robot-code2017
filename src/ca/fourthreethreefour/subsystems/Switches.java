@@ -13,6 +13,6 @@ public interface Switches extends Settings {
     /**
      * Hardware switch on the robot. Determines which alliance the robot is on, used for turning in auto.
      */
-//    DigitalInput allianceSwitch = new DigitalInput(ALLIANCE_SWITCH);
+    DigitalInput allianceSwitch = new DigitalInput(ALLIANCE_SWITCH);
     
 }

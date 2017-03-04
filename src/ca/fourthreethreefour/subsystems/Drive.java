@@ -36,7 +36,7 @@ public interface Drive extends Settings {
     Function turnFunction = new Function() {
         @Override
         public double F(double in) {
-            double turn = in > 0 ? Math.pow(in, TURN_CURVE) : -Math.abs(Math.pow(in, TURN_CURVE));    
+            double turn = in > 0 ? Math.pow(in, TURN_CURVE) : -Math.pow(Math.abs(in), TURN_CURVE);    
             return turn * TURN_CONSTANT;
         }
     };

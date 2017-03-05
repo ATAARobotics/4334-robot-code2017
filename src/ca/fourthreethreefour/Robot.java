@@ -4,6 +4,7 @@ import java.io.File;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.settings.AutoFile;
+import ca.fourthreethreefour.subsystems.Switches;
 import edu.first.command.Command;
 import edu.first.command.Commands;
 import edu.first.identifiers.InversedSpeedController;
@@ -14,14 +15,16 @@ import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 
-    private final Subsystem AUTO_MODULES = new Subsystem(new Module[] { drive, bucket, gearGuard });
+    private final Subsystem AUTO_MODULES = new Subsystem(
+            new Module[] { drive, bucket, gearGuard });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, driveEncoder, climber, bucket, gearGuard, indicator, controllers });
+            new Module[] { drive, climber, bucket, gearGuard, indicator, controllers });
 
     private final Subsystem ALL_MODULES = new Subsystem(new Module[] { AUTO_MODULES, TELEOP_MODULES });
 
@@ -58,48 +61,33 @@ public class Robot extends IterativeRobotAdapter {
 
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
+<<<<<<< HEAD
         controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
+=======
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
+        
+        driveEncoder.setDistancePerPulse(1);
+>>>>>>> 708e14d... Adjustments to autofile implementation
     }
     
-    private Command autoRedLeft;
-    private Command autoRedCenter;
-    private Command autoRedRight;
-    private Command autoBlueLeft;
-    private Command autoBlueCenter;
-    private Command autoBlueRight;
+    private Command autoCommand;
     
-
+    @Override
+    public void initDisabled() {
+        autoSwitch.enable();
+    }
+    
     @Override
     public void periodicDisabled() {
-        autoRedLeft = new AutoFile(new File("/auto_red_left.txt")).toCommand();
-        autoRedCenter = new AutoFile(new File("/auto_red_center.txt")).toCommand();
-        autoRedRight = new AutoFile(new File("/auto_red_right.txt")).toCommand();
-        autoBlueLeft = new AutoFile(new File("/auto_blue_left.txt")).toCommand();
-        autoBlueLeft = new AutoFile(new File("/auto_blue_center.txt")).toCommand();
-        autoBlueLeft = new AutoFile(new File("/auto_blue_right.txt")).toCommand();
+        String alliance = AUTO_ALLIANCE_INDEPENDANT ? "" : (autoSwitch.getPosition() ? "red" : "blue");
+        autoCommand = new AutoFile(new File(alliance + "-" + AUTO_TYPE + ".txt")).toCommand();
+        Timer.delay(1);
     }
 
     @Override
     public void initAutonomous() {
         AUTO_MODULES.enable();
-
-        if (allianceSwitch.equals(0)) {
-            if (AUTO_TYPE.equalsIgnoreCase("center")) {
-                autoBlueCenter.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("left")) {
-                autoBlueLeft.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("right")) {
-                autoBlueRight.run();
-            }
-        } else if (allianceSwitch.equals(1)) {
-            if (AUTO_TYPE.equalsIgnoreCase("center")) {
-                autoRedCenter.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("left")) {
-                autoRedLeft.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("right")) {
-                autoRedRight.run();
-            }
-        }
+        Commands.run(autoCommand);
     }
 
     @Override

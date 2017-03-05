@@ -18,8 +18,9 @@ import edu.first.commands.common.WaitCommand;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
 
 /*
+ * driveSpeed = 0.43
  * 1-CommandName:(0.5, -0.5, 1000L)
- * 2-OtherCommand:(0.5, -0.5, 1000L)
+ * 2-OtherCommand:(0.5, driveSpeed, 1000L)
  * 3-Command:1
  * 
  * add any custom commands in the static {} block below, look at
@@ -31,23 +32,14 @@ public class AutoFile extends SettingsFile implements Drive {
     
     static {
        COMMANDS.put("print", new PrintCommand());
-       COMMANDS.put("Print", new PrintCommand());
        COMMANDS.put("drive", new DriveCommand());
-       COMMANDS.put("Drive", new DriveCommand());
+       COMMANDS.put("drive straight", new EncoderDrive());
        COMMANDS.put("stop", new StopCommand());
-       COMMANDS.put("Stop", new StopCommand());
-       COMMANDS.put("oh god please stop", new StopCommand());
-       COMMANDS.put("hammertime", new StopCommand());
        COMMANDS.put("wait", new Wait());
-       COMMANDS.put("Wait", new Wait());
-       COMMANDS.put("deploy", new DeployBucket());
-       COMMANDS.put("Deploy", new DeployBucket());
-       COMMANDS.put("retract", new RetractBucket());
-       COMMANDS.put("Retract", new RetractBucket());
-       COMMANDS.put("close", new CloseGuard());
-       COMMANDS.put("Close", new CloseGuard());
-       COMMANDS.put("open", new OpenGuard());
-       COMMANDS.put("Open", new OpenGuard());
+       COMMANDS.put("deploy bucket", new DeployBucket());
+       COMMANDS.put("retract bucket", new RetractBucket());
+       COMMANDS.put("close guard", new CloseGuard());
+       COMMANDS.put("open guard", new OpenGuard());
     }
     
     private static class PrintCommand implements RuntimeCommand {
@@ -217,7 +209,7 @@ public class AutoFile extends SettingsFile implements Drive {
 
         public AutoFileCommand(String key, String arguments) {
             this.index = Integer.parseInt(key.substring(0, key.indexOf('-')));
-            this.name = key.substring(key.indexOf('-') + 1);
+            this.name = key.substring(key.indexOf('-') + 1).toLowerCase();
             
             String inner = arguments;
             if (arguments.contains("(") && arguments.contains(")")) {

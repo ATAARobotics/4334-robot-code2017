@@ -3,13 +3,11 @@ package ca.fourthreethreefour.settings;
 import java.io.File;
 
 public interface Settings {
-    SettingsFile settingsFile = new SettingsFile(new File("/settings.txt"));
+    SettingsFile settingsFile = SettingsFile.findFile(new File("/settings.txt"));
 
     String ROBOT_TYPE = settingsFile.getProperty("ROBOT_TYPE", "");
-    /**
-     * placeholder for alliance switch
-     */
-    String AUTO_TYPE = settingsFile.getProperty("AUTO_TYPE", "Center");
+    boolean AUTO_ALLIANCE_INDEPENDENT = settingsFile.getBooleanProperty("AUTO_ALLIANCE_INDEPENDANT", false);
+    String AUTO_TYPE = settingsFile.getProperty("AUTO_TYPE", "");
     
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);
     double TURN_CURVE = settingsFile.getDoubleProperty("TURN_CURVE", 1.5);
@@ -35,5 +33,4 @@ public interface Settings {
     int CONTROLLER_1 = settingsFile.getIntProperty("CONTROLLER_1", 0);
     int CONTROLLER_2 = settingsFile.getIntProperty("CONTROLLER_2", 1);
     int ALLIANCE_SWITCH = settingsFile.getIntProperty("ALLIANCE_SWITCH", 0);
-    int AUTO_SWITCH = settingsFile.getIntProperty("AUTO_SWITCH", 1);
 }

@@ -1,10 +1,10 @@
 package ca.fourthreethreefour;
 
 import java.io.File;
+import java.io.IOException;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.settings.AutoFile;
-import ca.fourthreethreefour.subsystems.Switches;
 import edu.first.command.Command;
 import edu.first.command.Commands;
 import edu.first.identifiers.InversedSpeedController;
@@ -16,7 +16,6 @@ import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobotAdapter {
 
@@ -74,13 +73,24 @@ public class Robot extends IterativeRobotAdapter {
     
     @Override
     public void initDisabled() {
-        autoSwitch.enable();
+//        allianceSwitch.enable();
     }
     
     @Override
     public void periodicDisabled() {
-        String alliance = AUTO_ALLIANCE_INDEPENDANT ? "" : (autoSwitch.getPosition() ? "red" : "blue");
-        autoCommand = new AutoFile(new File(alliance + "-" + AUTO_TYPE + ".txt")).toCommand();
+        if (AUTO_TYPE == "") { return; }
+        String alliance = ""; /* AUTO_ALLIANCE_INDEPENDENT ? "" : (allianceSwitch.getPosition() ? "red-" : "blue-"); */
+        try {
+            autoCommand = new AutoFile(new File(alliance + AUTO_TYPE + ".txt")).toCommand();
+        } catch (IOException e) {
+            // try alliance independent as backup
+            try {
+                autoCommand = new AutoFile(new File(AUTO_TYPE + ".txt")).toCommand();
+            } catch (IOException i) {
+                throw new Error(e.getMessage());
+            }
+        }
+       
         Timer.delay(1);
     }
 
@@ -110,6 +120,7 @@ public class Robot extends IterativeRobotAdapter {
     public void periodicTeleoperated() {
         controller1.doBinds();
         controller2.doBinds();
+//        System.out.println(allianceSwitch.getPosition());
 
         if (gearGuard.get() == Direction.LEFT && bucketSolenoid.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
@@ -117,8 +128,8 @@ public class Robot extends IterativeRobotAdapter {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
 
-        SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
-        SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
+        //SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
+        //SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
         // SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
     }
 

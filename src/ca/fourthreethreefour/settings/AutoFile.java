@@ -39,10 +39,10 @@ public class AutoFile extends SettingsFile implements Drive {
         COMMANDS.put("drive", new DriveCommand());
         COMMANDS.put("stop", new StopCommand());
         COMMANDS.put("wait", new Wait());
-        COMMANDS.put("deploy bucket", new DeployBucket());
-        COMMANDS.put("retract bucket", new RetractBucket());
-        COMMANDS.put("close guard", new CloseGuard());
-        COMMANDS.put("open guard", new OpenGuard());
+        COMMANDS.put("deploybucket", new DeployBucket());
+        COMMANDS.put("retractbucket", new RetractBucket());
+        COMMANDS.put("closeguard", new CloseGuard());
+        COMMANDS.put("openguard", new OpenGuard());
     }
 
     private static class PrintCommand implements RuntimeCommand {
@@ -62,7 +62,7 @@ public class AutoFile extends SettingsFile implements Drive {
         public Command getCommand(List<String> args) {
             double left = Double.parseDouble(args.get(0));
             double right = Double.parseDouble(args.get(1));
-            double timeout = Double.parseDouble(args.get(2));
+            double timeout = Long.parseLong(args.get(2));
 
             if (args.size() != 3) {
                 throw new IllegalArgumentException("Error in Drive: Invalid arguments");
@@ -75,9 +75,9 @@ public class AutoFile extends SettingsFile implements Drive {
                 public boolean continueLoop() {
                     if (start == 0) {
                         start = System.currentTimeMillis();
-                        return start != 0;
+                        return timeout != 0;
                     } else {
-                        return System.currentTimeMillis() - start > timeout;
+                        return System.currentTimeMillis() - start < timeout;
                     }
                 }
 
@@ -88,7 +88,28 @@ public class AutoFile extends SettingsFile implements Drive {
             };
         }
     }
-
+    
+    private static class EncoderDrive implements RuntimeCommand {
+        @Override
+        public LoopingCommand getCommand(List<String> args) {
+            double speed = Double.parseDouble(args.get(0));
+            double distance =Double.parseDouble(args.get(1));
+            
+            return new LoopingCommand() {
+                
+                @Override
+                public boolean continueLoop() {
+                        return (driveEncoder.getDistance() < distance);
+                }   
+                
+                @Override
+                public void runLoop() {
+                    drivetrain.drive(speed, 0);
+                }
+            };
+        }
+    }
+    
     private static class StopCommand implements RuntimeCommand {
         @Override
         public Command getCommand(List<String> args) {
@@ -107,55 +128,55 @@ public class AutoFile extends SettingsFile implements Drive {
         }
     }
 
-    private static class DeployBucket implements RuntimeCommand {
+    private static class DeployBucket implements RuntimeCommand, Bucket {
         @Override
         public Command getCommand(List<String> args) {
             return new Command() {
                 @Override
                 public void run() {
-                    Bucket.bucketSolenoid.set(Direction.RIGHT);
+                    Bucket.bucketSolenoid.set(BUCKET_OUT);
                 }
             };
         }
     }
 
-    private static class RetractBucket implements RuntimeCommand {
+    private static class RetractBucket implements RuntimeCommand, Bucket {
         @Override
         public Command getCommand(List<String> args) {
             return new Command() {
                 @Override
                 public void run() {
-                    Bucket.bucketSolenoid.set(Direction.LEFT);
+                    Bucket.bucketSolenoid.set(BUCKET_IN);
                 }
             };
         }
     }
 
-    private static class CloseGuard implements RuntimeCommand {
+    private static class CloseGuard implements RuntimeCommand, GearGuard {
         @Override
         public Command getCommand(List<String> args) {
             return new Command() {
                 @Override
                 public void run() {
-                    GearGuard.gearGuard.set(Direction.RIGHT);
+                    GearGuard.gearGuard.set(GEAR_GUARD_OUT);
                 }
             };
         }
     }
 
-    private static class OpenGuard implements RuntimeCommand {
+    private static class OpenGuard implements RuntimeCommand, GearGuard {
         @Override
         public Command getCommand(List<String> args) {
             return new Command() {
                 @Override
                 public void run() {
-                    GearGuard.gearGuard.set(Direction.LEFT);
+                    GearGuard.gearGuard.set(GEAR_GUARD_IN);
                 }
             };
         }
     }
 
-    public AutoFile(File file) {
+    public AutoFile(File file) throws IOException {
         super(file);
     }
 
@@ -218,7 +239,7 @@ public class AutoFile extends SettingsFile implements Drive {
             if (arguments.contains("(") && arguments.contains(")")) {
                 inner = arguments.substring(arguments.indexOf('(') + 1, arguments.indexOf(')'));
             }
-            this.arguments = Arrays.asList(inner.split(","));
+            this.arguments = Arrays.asList(inner.split(",")).stream().map(String::trim).collect(Collectors.toList());
         }
 
         @Override

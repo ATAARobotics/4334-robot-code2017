@@ -13,4 +13,7 @@ public interface Bucket extends Settings {
     //DigitalInput bucketSwitch = new DigitalInput(BUCKET_SWITCH);
 
     Subsystem bucket = new Subsystem(new Module[] { bucketSolenoid });
+    
+    DualActionSolenoid.Direction BUCKET_IN = Direction.LEFT;
+    DualActionSolenoid.Direction BUCKET_OUT = Direction.RIGHT;
 }

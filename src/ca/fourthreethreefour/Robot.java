@@ -42,6 +42,7 @@ public class Robot extends IterativeRobotAdapter {
         }
 
         ALL_MODULES.init();
+        drivetrain.setExpiration(0.1);
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
         controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);
@@ -60,13 +61,7 @@ public class Robot extends IterativeRobotAdapter {
 
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
-<<<<<<< HEAD
         controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
-=======
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
-        
-        driveEncoder.setDistancePerPulse(1);
->>>>>>> 708e14d... Adjustments to autofile implementation
     }
     
     private Command autoCommand;
@@ -97,11 +92,14 @@ public class Robot extends IterativeRobotAdapter {
     @Override
     public void initAutonomous() {
         AUTO_MODULES.enable();
+        drivetrain.setSafetyEnabled(false);
         Commands.run(autoCommand);
+        drivetrain.stopMotor();
     }
 
     @Override
     public void endAutonomous() {
+        drivetrain.setSafetyEnabled(true);
         AUTO_MODULES.disable();
     }
 

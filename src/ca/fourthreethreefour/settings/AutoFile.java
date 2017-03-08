@@ -231,7 +231,7 @@ public class AutoFile extends SettingsFile implements Drive {
                     group.appendSequential(COMMANDS.get(command.name).getCommand(command.arguments));
                 }
             } else {
-                System.err.println(command.name + " not found");
+                throw new Error(command.name + " not found");
             }
         }
 

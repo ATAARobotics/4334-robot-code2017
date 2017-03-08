@@ -122,7 +122,7 @@ public final class SafeRobotMode implements RobotMode {
         try {
             mode.periodicDisabled();
         } catch (Exception t) {
-            Logger.getLogger(this).error("Error", t);
+            Logger.getLogger(this).warn("ERROR: " + t.getMessage());
         }
     }
 

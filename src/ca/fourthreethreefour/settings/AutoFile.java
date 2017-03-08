@@ -18,7 +18,7 @@ import edu.first.commands.CommandGroup;
 import edu.first.commands.common.LoopingCommand;
 import edu.first.commands.common.SetOutput;
 import edu.first.commands.common.WaitCommand;
-import edu.first.module.actuators.DualActionSolenoid.Direction;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /*
  * driveSpeed = 0.43
@@ -41,6 +41,7 @@ public class AutoFile extends SettingsFile implements Drive {
         COMMANDS.put("drive", new DriveCommand());
         COMMANDS.put("stop", new StopCommand());
         COMMANDS.put("wait", new Wait());
+        COMMANDS.put("waitUntil", new WaitUntil());
         COMMANDS.put("deploybucket", new DeployBucket());
         COMMANDS.put("retractbucket", new RetractBucket());
         COMMANDS.put("closeguard", new CloseGuard());
@@ -124,12 +125,29 @@ public class AutoFile extends SettingsFile implements Drive {
         public Command getCommand(List<String> args) {
             if (args.size() != 1) {
                 throw new IllegalArgumentException("Error in Wait: Invalid arguments");
-            }else {
+            } else {
                 return new WaitCommand(Double.parseDouble(args.get(0)));
             }
         }
     }
 
+    
+    private static class WaitUntil implements RuntimeCommand {
+
+        @Override
+        public Command getCommand(List<String> args) {
+            double time = Double.parseDouble(args.get(0));
+            return new Command() {
+
+                @Override
+                public void run() {
+                    while (DriverStation.getInstance().getMatchTime() < time) {
+                        drivetrain.stopMotor();
+                    }
+                }  
+            };
+        }
+    }
     private static class DeployBucket implements RuntimeCommand, Bucket {
         @Override
         public Command getCommand(List<String> args) {

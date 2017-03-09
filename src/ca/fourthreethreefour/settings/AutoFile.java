@@ -1,12 +1,14 @@
 package ca.fourthreethreefour.settings;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Drive;
@@ -14,13 +16,18 @@ import ca.fourthreethreefour.subsystems.GearGuard;
 import edu.first.command.Command;
 import edu.first.commands.CommandGroup;
 import edu.first.commands.common.LoopingCommand;
+import edu.first.commands.common.SetOutput;
 import edu.first.commands.common.WaitCommand;
-import edu.first.module.actuators.DualActionSolenoid.Direction;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /*
+ * driveSpeed = 0.43
+ * foo = name
  * 1-CommandName:(0.5, -0.5, 1000L)
- * 2-OtherCommand:(0.5, -0.5, 1000L)
+ * 2-OtherCommand:(0.5, driveSpeed, 1000L)
  * 3-Command:1
+ * 4-!ConcurrentCommand:2
+ * 5-!ConcurrentCommand:3
  * 
  * add any custom commands in the static {} block below, look at
  * PrintCommand for an example
@@ -28,214 +35,243 @@ import edu.first.module.actuators.DualActionSolenoid.Direction;
 public class AutoFile extends SettingsFile implements Drive {
     private static final long serialVersionUID = 5658050910302255585L;
     public static final HashMap<String, RuntimeCommand> COMMANDS = new HashMap<>();
-    
-    static {
-       COMMANDS.put("print", new PrintCommand());
-       COMMANDS.put("Print", new PrintCommand());
-       COMMANDS.put("drive", new DriveCommand());
-       COMMANDS.put("Drive", new DriveCommand());
-       COMMANDS.put("stop", new StopCommand());
-       COMMANDS.put("Stop", new StopCommand());
-       COMMANDS.put("oh god please stop", new StopCommand());
-       COMMANDS.put("hammertime", new StopCommand());
-       COMMANDS.put("wait", new Wait());
-       COMMANDS.put("Wait", new Wait());
-       COMMANDS.put("deploy", new DeployBucket());
-       COMMANDS.put("Deploy", new DeployBucket());
-       COMMANDS.put("retract", new RetractBucket());
-       COMMANDS.put("Retract", new RetractBucket());
-       COMMANDS.put("close", new CloseGuard());
-       COMMANDS.put("Close", new CloseGuard());
-       COMMANDS.put("open", new OpenGuard());
-       COMMANDS.put("Open", new OpenGuard());
-    }
-    
-    private static class PrintCommand implements RuntimeCommand {
-       @Override
-       public Command getCommand(List<String> args) {
-           return new Command() {
-               @Override
-               public void run() {
-                   System.out.println(args.toString());
-               }
-           };
-       }
-    }
-    
-    private static class DriveCommand implements RuntimeCommand {
-        
-        long start = 0;
 
+    static {
+        COMMANDS.put("print", new PrintCommand());
+        COMMANDS.put("drive", new DriveCommand());
+        COMMANDS.put("stop", new StopCommand());
+        COMMANDS.put("wait", new Wait());
+        COMMANDS.put("waitUntil", new WaitUntil());
+        COMMANDS.put("deploybucket", new DeployBucket());
+        COMMANDS.put("retractbucket", new RetractBucket());
+        COMMANDS.put("closeguard", new CloseGuard());
+        COMMANDS.put("openguard", new OpenGuard());
+    }
+
+    private static class PrintCommand implements RuntimeCommand {
         @Override
-        public LoopingCommand getCommand(List<String> args) {
+        public Command getCommand(List<String> args) {
+            return new Command() {
+                @Override
+                public void run() {
+                    System.out.println(args.toString());
+                }
+            };
+        }
+    }
+
+    private static class DriveCommand implements RuntimeCommand {
+        @Override
+        public Command getCommand(List<String> args) {
             double left = Double.parseDouble(args.get(0));
             double right = Double.parseDouble(args.get(1));
-            
-            if (args.size() == 3) {
-                //drivetrain.makeTea(EARL_GREY, hot);
-            } else if (args.size() > 3) {
-                throw new IllegalStateException("Error in Drive: Too many arguments");
-            } else if (args.size() < 2) {
-                throw new IllegalStateException("Error in Drive: Not enough arguments");
+            double timeout = Long.parseLong(args.get(2));
+
+            if (args.size() != 3) {
+                throw new IllegalArgumentException("Error in Drive: Invalid arguments");
             }
-            
+
             return new LoopingCommand() {
-                
+                long start = 0;
+
                 @Override
                 public boolean continueLoop() {
                     if (start == 0) {
                         start = System.currentTimeMillis();
-                        return start != 0;
-                    } else if (args.size() == 3) {
-                        return System.currentTimeMillis() - start > Double.parseDouble(args.get(2));
+                        return timeout != 0;
                     } else {
-                        return false;
+                        return System.currentTimeMillis() - start < timeout;
                     }
                 }
 
                 @Override
                 public void runLoop() {
-                    drivetrain.tankDrive(left, right);
+                    drivetrain.set(left, right);
+                }
+            };
+        }
+    }
+    
+    private static class EncoderDrive implements RuntimeCommand {
+        @Override
+        public LoopingCommand getCommand(List<String> args) {
+            double speed = Double.parseDouble(args.get(0));
+            double distance =Double.parseDouble(args.get(1));
+            
+            return new LoopingCommand() {
+                
+                @Override
+                public boolean continueLoop() {
+                        return (driveEncoder.getDistance() < distance);
+                }   
+                
+                @Override
+                public void runLoop() {
+                    drivetrain.drive(speed, 0);
                 }
             };
         }
     }
     
     private static class StopCommand implements RuntimeCommand {
-
         @Override
         public Command getCommand(List<String> args) {
-            Double.parseDouble(args.get(0));
-            
-            return new Command() {
-
-                @Override
-                public void run() {
-                    drivetrain.stopMotor();
-                }
-            };
+            return new SetOutput(drivetrain.getDriveStraight(), 0);
         }
     }
-    
+
     private static class Wait implements RuntimeCommand {
-        
         @Override
         public Command getCommand(List<String> args) {
-            if (args.size() > 1) {
-                throw new IllegalStateException("Error in Wait: Too many arguments");
-            } else if (args.size() < 1) {
-                throw new IllegalStateException("Error in Wait: Not enough arguments");
+            if (args.size() != 1) {
+                throw new IllegalArgumentException("Error in Wait: Invalid arguments");
             } else {
                 return new WaitCommand(Double.parseDouble(args.get(0)));
             }
         }
     }
+
     
-    private static class DeployBucket implements RuntimeCommand {
+    private static class WaitUntil implements RuntimeCommand {
 
         @Override
         public Command getCommand(List<String> args) {
+            double time = Double.parseDouble(args.get(0));
             return new Command() {
 
                 @Override
                 public void run() {
-                    Bucket.bucketSolenoid.set(Direction.RIGHT);
-                }
+                    while (DriverStation.getInstance().getMatchTime() < time) {
+                        drivetrain.stopMotor();
+                    }
+                }  
             };
         }
     }
-    
-    private static class RetractBucket implements RuntimeCommand {
-
+    private static class DeployBucket implements RuntimeCommand, Bucket {
         @Override
         public Command getCommand(List<String> args) {
             return new Command() {
-
                 @Override
                 public void run() {
-                    Bucket.bucketSolenoid.set(Direction.LEFT);
-                }
-            };
-        }
-    }
-    
-    private static class CloseGuard implements RuntimeCommand {
-
-        @Override
-        public Command getCommand(List<String> args) {
-            return new Command() {
-
-                @Override
-                public void run() {
-                    GearGuard.gearGuard.set(Direction.RIGHT);
-                }
-            };
-        }
-    }
-    
-    private static class OpenGuard implements RuntimeCommand {
-
-        @Override
-        public Command getCommand(List<String> args) {
-            return new Command() {
-
-                @Override
-                public void run() {
-                    GearGuard.gearGuard.set(Direction.LEFT);
+                    Bucket.bucketSolenoid.set(BUCKET_OUT);
                 }
             };
         }
     }
 
-    public AutoFile(File file) {
+    private static class RetractBucket implements RuntimeCommand, Bucket {
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+                @Override
+                public void run() {
+                    Bucket.bucketSolenoid.set(BUCKET_IN);
+                }
+            };
+        }
+    }
+
+    private static class CloseGuard implements RuntimeCommand, GearGuard {
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+                @Override
+                public void run() {
+                    GearGuard.gearGuard.set(GEAR_GUARD_OUT);
+                }
+            };
+        }
+    }
+
+    private static class OpenGuard implements RuntimeCommand, GearGuard {
+        @Override
+        public Command getCommand(List<String> args) {
+            return new Command() {
+                @Override
+                public void run() {
+                    GearGuard.gearGuard.set(GEAR_GUARD_IN);
+                }
+            };
+        }
+    }
+
+    public AutoFile(File file) throws IOException {
         super(file);
     }
-    
+
     public Command toCommand() {
-       ArrayList<AutoFileCommand> commands = new ArrayList<>();
-       for (Map.Entry<Object, Object> e : entrySet()) {
-           commands.add(new AutoFileCommand(e.getKey().toString(), e.getValue().toString()));
-       }
-       Collections.sort(commands);
-       
-       CommandGroup group = new CommandGroupFactory();
-       for (AutoFileCommand command : commands) {
-           if (COMMANDS.containsKey(command.name)) {
-               group.appendSequential(COMMANDS.get(command.name).getCommand(command.arguments));
-           } else {
-               System.err.println(command.name + " not found");
-           }
-       }
-       
-       return group;
+        Map<String, String> variables = new HashMap<>();
+        for (Map.Entry<Object, Object> e : entrySet()) {
+            String key = e.getKey().toString(), value = e.getValue().toString();
+            if (!key.contains("-")) {
+                variables.put(key, value);
+            }
+        }
+
+        ArrayList<AutoFileCommand> commands = new ArrayList<>();
+        for (Map.Entry<Object, Object> e : entrySet()) {
+            String key = e.getKey().toString(), value = e.getValue().toString();
+            if (variables.containsKey(value)) {
+                value = variables.get(value);
+            }
+
+            if (key.contains("-")) {
+                commands.add(new AutoFileCommand(key, value));
+            }
+        }
+        Collections.sort(commands);
+
+        CommandGroup group = new CommandGroupFactory();
+        for (AutoFileCommand command : commands) {
+            if (COMMANDS.containsKey(command.name)) {
+                if (command.concurrent) {
+                    group.appendConcurrent(COMMANDS.get(command.name).getCommand(command.arguments));
+                } else {
+                    group.appendSequential(COMMANDS.get(command.name).getCommand(command.arguments));
+                }
+            } else {
+                throw new Error(command.name + " not found");
+            }
+        }
+
+        return group;
     }
-    
+
     private static class AutoFileCommand implements Comparable<AutoFileCommand> {
         public final int index;
+        public final boolean concurrent;
         public final String name;
         public final List<String> arguments;
 
         public AutoFileCommand(String key, String arguments) {
             this.index = Integer.parseInt(key.substring(0, key.indexOf('-')));
-            this.name = key.substring(key.indexOf('-') + 1);
-            
+            String keyname = key.substring(key.indexOf('-') + 1).toLowerCase();
+            if (keyname.startsWith("!")) {
+                this.concurrent = true;
+                this.name = keyname.substring(1);
+            } else {
+                this.concurrent = false;
+                this.name = keyname;
+            }
+
             String inner = arguments;
             if (arguments.contains("(") && arguments.contains(")")) {
                 inner = arguments.substring(arguments.indexOf('(') + 1, arguments.indexOf(')'));
             }
-            this.arguments = Arrays.asList(inner.split(","));
+            this.arguments = Arrays.asList(inner.split(",")).stream().map(String::trim).collect(Collectors.toList());
         }
-        
+
         @Override
         public int compareTo(AutoFileCommand o) {
-           return index - o.index;
+            return index - o.index;
         }
     }
-    
+
     private interface RuntimeCommand {
-       public Command getCommand(List<String> args);
+        public Command getCommand(List<String> args);
     }
-    
+
     private static class CommandGroupFactory extends CommandGroup {
         public CommandGroupFactory() {}
     }

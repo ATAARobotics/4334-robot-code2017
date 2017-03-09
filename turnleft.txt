@@ -1,0 +1,17 @@
+1-print:(Left turn auto started)
+2-closeGuard:()
+3-wait:(0.5)
+4-deployBucket:()
+5-drive:(0.4, 0.4, 2200)
+6-drive:(-0.5, 0.5, 500)
+7-wait:(0.25)
+8-drive:(0.4, 0.4, 1200)
+9-wait:(0.5)
+10-openGuard:()
+11-wait:(1.4)
+12-retractBucket:()
+13-drive:(-0.4, -0.4, 1200) back up
+14-drive:(0.4, -0.6, 800) turn right
+15-drive:(0.4, 0.4, 1500) go forwards
+16-wait:(3) wait for sprint
+17-drive:(0.8, 0.8, 2000) go go go

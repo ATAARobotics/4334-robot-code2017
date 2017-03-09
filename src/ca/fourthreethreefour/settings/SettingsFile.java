@@ -2,7 +2,6 @@ package ca.fourthreethreefour.settings;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -13,25 +12,29 @@ public class SettingsFile extends Properties {
     private static final long serialVersionUID = -6308390915164135156L;
 
     DriverStation driverStation = DriverStation.getInstance();
-
-    public SettingsFile(File file) {
+    
+    public static SettingsFile findFile(File file) {
         try {
-            load(new FileInputStream(file));
-        } catch (FileNotFoundException err) {
-            DriverStation.reportError("File not found", false);
-            err.printStackTrace();
-        } catch (IOException err) {
-            DriverStation.reportError("I/O Exception", false);
-            err.printStackTrace();
+            return new SettingsFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new SettingsFile();
         }
     }
+
+    public SettingsFile(File file) throws IOException {
+        load(new FileInputStream(file));
+    }
     
+    public SettingsFile() {}
+
     @Override
     public String getProperty(String key, String defaultValue) {
         if (containsKey(key)) {
             return super.getProperty(key);
         } else {
-            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
+            Logger.getLogger(SettingsFile.class)
+                    .info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }
@@ -40,7 +43,8 @@ public class SettingsFile extends Properties {
         if (stringPropertyNames().contains(key)) {
             return Integer.parseInt(getProperty(key));
         } else {
-            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
+            Logger.getLogger(SettingsFile.class)
+                    .info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }
@@ -49,7 +53,8 @@ public class SettingsFile extends Properties {
         if (stringPropertyNames().contains(key)) {
             return Double.parseDouble(getProperty(key));
         } else {
-            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
+            Logger.getLogger(SettingsFile.class)
+                    .info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }
@@ -58,7 +63,8 @@ public class SettingsFile extends Properties {
         if (stringPropertyNames().contains(key)) {
             return Boolean.parseBoolean(getProperty(key));
         } else {
-            Logger.getLogger(SettingsFile.class).info(key + " not found in settings file, using default (" + defaultValue + ")");
+            Logger.getLogger(SettingsFile.class)
+                    .info(key + " not found in settings file, using default (" + defaultValue + ")");
             return defaultValue;
         }
     }

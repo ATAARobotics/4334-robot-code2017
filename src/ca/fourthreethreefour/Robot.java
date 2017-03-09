@@ -1,6 +1,7 @@
 package ca.fourthreethreefour;
 
 import java.io.File;
+import java.io.IOException;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.settings.AutoFile;
@@ -14,14 +15,15 @@ import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobotAdapter {
 
-    private final Subsystem AUTO_MODULES = new Subsystem(new Module[] { drive, bucket, gearGuard });
+    private final Subsystem AUTO_MODULES = new Subsystem(
+            new Module[] { drive, bucket, gearGuard });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, driveEncoder, climber, bucket, gearGuard, indicator, controllers });
+            new Module[] { drive, climber, bucket, gearGuard, indicator, controllers });
 
     private final Subsystem ALL_MODULES = new Subsystem(new Module[] { AUTO_MODULES, TELEOP_MODULES });
 
@@ -40,6 +42,7 @@ public class Robot extends IterativeRobotAdapter {
         }
 
         ALL_MODULES.init();
+        drivetrain.setExpiration(0.1);
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
         controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);
@@ -61,49 +64,42 @@ public class Robot extends IterativeRobotAdapter {
         controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
     }
     
-    private Command autoRedLeft;
-    private Command autoRedCenter;
-    private Command autoRedRight;
-    private Command autoBlueLeft;
-    private Command autoBlueCenter;
-    private Command autoBlueRight;
+    private Command autoCommand;
     
-
+    @Override
+    public void initDisabled() {
+//        allianceSwitch.enable();
+    }
+    
     @Override
     public void periodicDisabled() {
-        autoRedLeft = new AutoFile(new File("/auto_red_left.txt")).toCommand();
-        autoRedCenter = new AutoFile(new File("/auto_red_center.txt")).toCommand();
-        autoRedRight = new AutoFile(new File("/auto_red_right.txt")).toCommand();
-        autoBlueLeft = new AutoFile(new File("/auto_blue_left.txt")).toCommand();
-        autoBlueLeft = new AutoFile(new File("/auto_blue_center.txt")).toCommand();
-        autoBlueLeft = new AutoFile(new File("/auto_blue_right.txt")).toCommand();
+        if (AUTO_TYPE == "") { return; }
+        String alliance = ""; /* AUTO_ALLIANCE_INDEPENDENT ? "" : (allianceSwitch.getPosition() ? "red-" : "blue-"); */
+        try {
+            autoCommand = new AutoFile(new File(alliance + AUTO_TYPE + ".txt")).toCommand();
+        } catch (IOException e) {
+            // try alliance independent as backup
+            try {
+                autoCommand = new AutoFile(new File(AUTO_TYPE + ".txt")).toCommand();
+            } catch (IOException i) {
+                throw new Error(e.getMessage());
+            }
+        }
+       
+        Timer.delay(1);
     }
 
     @Override
     public void initAutonomous() {
         AUTO_MODULES.enable();
-
-        if (allianceSwitch.equals(0)) {
-            if (AUTO_TYPE.equalsIgnoreCase("center")) {
-                autoBlueCenter.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("left")) {
-                autoBlueLeft.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("right")) {
-                autoBlueRight.run();
-            }
-        } else if (allianceSwitch.equals(1)) {
-            if (AUTO_TYPE.equalsIgnoreCase("center")) {
-                autoRedCenter.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("left")) {
-                autoRedLeft.run();
-            } else if (AUTO_TYPE.equalsIgnoreCase("right")) {
-                autoRedRight.run();
-            }
-        }
+        drivetrain.setSafetyEnabled(false);
+        Commands.run(autoCommand);
+        drivetrain.stopMotor();
     }
 
     @Override
     public void endAutonomous() {
+        drivetrain.setSafetyEnabled(true);
         AUTO_MODULES.disable();
     }
 
@@ -122,6 +118,7 @@ public class Robot extends IterativeRobotAdapter {
     public void periodicTeleoperated() {
         controller1.doBinds();
         controller2.doBinds();
+//        System.out.println(allianceSwitch.getPosition());
 
         if (gearGuard.get() == Direction.LEFT && bucketSolenoid.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
@@ -129,8 +126,8 @@ public class Robot extends IterativeRobotAdapter {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
 
-        SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
-        SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
+        //SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
+        //SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
         // SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
     }
 

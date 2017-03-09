@@ -1,6 +1,8 @@
 package ca.fourthreethreefour.subsystems;
 
 import ca.fourthreethreefour.settings.Settings;
+import edu.first.module.actuators.DualActionSolenoid;
+import edu.first.module.actuators.DualActionSolenoid.Direction;
 import edu.first.module.actuators.DualActionSolenoidModule;
 import edu.first.module.actuators.SpikeRelayModule;
 
@@ -16,4 +18,7 @@ public interface GearGuard extends Settings {
      * In other words, the light turns on if the robot is ready to accept a gear.
      */
     SpikeRelayModule indicator = new SpikeRelayModule(INDICATOR);
+    
+    DualActionSolenoid.Direction GEAR_GUARD_IN = Direction.LEFT;
+    DualActionSolenoid.Direction GEAR_GUARD_OUT = Direction.RIGHT;
 }

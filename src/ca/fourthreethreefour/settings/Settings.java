@@ -6,7 +6,7 @@ public interface Settings {
     SettingsFile settingsFile = SettingsFile.findFile(new File("/settings.txt"));
 
     String ROBOT_TYPE = settingsFile.getProperty("ROBOT_TYPE", "");
-    boolean AUTO_ALLIANCE_INDEPENDENT = settingsFile.getBooleanProperty("AUTO_ALLIANCE_INDEPENDANT", false);
+    boolean AUTO_ALLIANCE_INDEPENDENT = settingsFile.getBooleanProperty("AUTO_ALLIANCE_INDEPENDENT", false);
     String AUTO_TYPE = settingsFile.getProperty("AUTO_TYPE", "");
     
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);

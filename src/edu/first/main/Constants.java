@@ -7,6 +7,7 @@ import ca.fourthreethreefour.subsystems.Controllers;
 import ca.fourthreethreefour.subsystems.Drive;
 import ca.fourthreethreefour.subsystems.GearGuard;
 import ca.fourthreethreefour.subsystems.Switches;
+import ca.fourthreethreefour.subsystems.TunedDrive;
 
 /**
  * The central repository for all constant values. Values here are expected to
@@ -48,5 +49,5 @@ import ca.fourthreethreefour.subsystems.Switches;
  * @since May 07 13
  * @author Joel Gallant
  */
-public interface Constants extends Drive, Climber, Bucket, GearGuard, Controllers, Switches, Settings {
+public interface Constants extends Drive, Climber, Bucket, GearGuard, Controllers, Switches, TunedDrive, Settings {
 }

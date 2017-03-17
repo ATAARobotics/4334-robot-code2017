@@ -7,9 +7,6 @@ import edu.first.module.Module;
 import edu.first.module.actuators.Drivetrain;
 import edu.first.module.actuators.VictorModule;
 import edu.first.module.actuators.VictorModuleGroup;
-import edu.first.module.sensors.EncoderModule;
-import edu.first.module.sensors.EncoderModule.InputType;
-import edu.first.module.sensors.GyroscopeModule;
 import edu.first.module.subsystems.Subsystem;
 
 public interface Drive extends Settings {
@@ -21,10 +18,6 @@ public interface Drive extends Settings {
             new VictorModule(DRIVE_RIGHT_2), new VictorModule(DRIVE_RIGHT_3) });
 
     Drivetrain drivetrain = new Drivetrain(new InversedSpeedController(left), right);
-    
-    EncoderModule driveEncoder = new EncoderModule(DRIVE_ENCODER_1, DRIVE_ENCODER_2, InputType.DISTANCE);
-    
-    GyroscopeModule driveGyro = new GyroscopeModule(DRIVE_GYRO);
 
     Function speedFunction = new Function() {
         @Override
@@ -32,11 +25,11 @@ public interface Drive extends Settings {
             return in > 0 ? in * in : -(in * in);
         }
     };
-    
+
     Function turnFunction = new Function() {
         @Override
         public double F(double in) {
-            double turn = in > 0 ? Math.pow(in, TURN_CURVE) : -Math.pow(Math.abs(in), TURN_CURVE);    
+            double turn = in > 0 ? Math.pow(in, TURN_CURVE) : -Math.pow(Math.abs(in), TURN_CURVE);
             return turn * TURN_CONSTANT;
         }
     };

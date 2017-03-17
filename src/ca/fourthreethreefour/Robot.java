@@ -7,7 +7,6 @@ import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
 import ca.fourthreethreefour.settings.AutoFile;
 import edu.first.command.Command;
 import edu.first.command.Commands;
-import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
@@ -20,7 +19,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class Robot extends IterativeRobotAdapter {
 
     private final Subsystem AUTO_MODULES = new Subsystem(
-            new Module[] { drive, bucket, gearGuard });
+            new Module[] { drive, bucket, gearGuard, tunedDrive });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
             new Module[] { drive, climber, bucket, gearGuard, indicator, controllers });

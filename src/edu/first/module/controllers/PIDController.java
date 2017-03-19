@@ -421,11 +421,12 @@ public class PIDController extends Controller implements PositionalSensor, Posit
         }
 
         output.set(result);
-
+        
         synchronized (lock) {
             prevError = error;
             prevResult = result;
             totalError = sTotalError;
+            notifyAll();
         }
     }
 

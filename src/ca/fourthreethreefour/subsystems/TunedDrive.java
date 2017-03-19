@@ -56,7 +56,12 @@ public interface TunedDrive extends Drive {
     }
 
     Input encoderInput = new DualEncoderInput(leftEncoder, rightEncoder);
-    InOut turnInput = new VolatileInOut();
+    Input turnInput = new Input() {
+        @Override
+        public double get() {
+            return navx.getAngle();
+        }
+    };
 
     InOut speedOutput = new VolatileInOut();
     InOut turnOutput = new VolatileInOut();

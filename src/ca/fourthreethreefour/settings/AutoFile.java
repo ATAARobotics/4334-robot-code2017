@@ -100,12 +100,11 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
         public Command getCommand(List<String> args) {
             int distance = Integer.parseInt(args.get(0));
             final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
-            
+
             return new LoopingCommand() {
                 double current = 0;
                 int correctIterations = 0;
-                boolean first = true;
-                
+
                 @Override
                 public boolean continueLoop() {
                     if (Math.abs(current - distance) < threshold) {
@@ -113,52 +112,9 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
                     } else {
                         correctIterations = 0;
                     }
-                    
-                    if (correctIterations >= 10) {
+
+                    if (correctIterations >= threshold) {
                         distancePID.disable();
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-                
-                @Override
-                public void runLoop() {
-                    if (first) {
-                        first = false;
-                        distancePID.enable();
-                        distancePID.setSetpoint(distance);
-                    }
-                    
-                    current = encoderInput.get();
-                    double output = speedOutput.get();
-                    drivetrain.set(output, output);
-                }
-            };
-        }
-    }
-    
-    private static class TurnCommand implements RuntimeCommand {
-        @Override
-        public Command getCommand(List<String> args) {
-            int angle = Integer.parseInt(args.get(0));
-            final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
-            
-            return new LoopingCommand() {
-                double current = 0;
-                int correctIterations = 0;
-                boolean first = true;
-                
-                @Override
-                public boolean continueLoop() {
-                    if (Math.abs(current - angle) < threshold) {
-                        correctIterations++;
-                    } else {
-                        correctIterations = 0;
-                    }
-                    
-                    if (correctIterations >= 10) {
-                        turningPID.disable();
                         return false;
                     } else {
                         return true;
@@ -166,23 +122,108 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
                 }
 
                 @Override
+                public void firstLoop() {
+                    distancePID.enable();
+                    distancePID.setSetpoint(distance);
+                }
+                
+                @Override
                 public void runLoop() {
-                    if (first) {
-                        first = false;
-                        turningPID.enable();
-                        turningPID.setSetpoint(angle);
-                    }
-                    
-                    current = navx.getAngle();
-                    turnInput.set(current);
-                    // hopefully PID can update fast enough here...
-                    // TODO: notify/wait for PID (add that functionality to PID)
-                    drivetrain.arcadeDrive(0, turnOutput.get());
+                    current = encoderInput.get();
+                    double output = speedOutput.get();
+                    drivetrain.set(output, output);
                 }
             };
         }
     }
-    
+
+    private static class DriveStraightCommand implements RuntimeCommand {
+        @Override
+        public Command getCommand(List<String> args) {
+            int distance = Integer.parseInt(args.get(0));
+            final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
+
+            return new LoopingCommand() {
+                double current = 0;
+                int correctIterations = 0;
+
+                @Override
+                public boolean continueLoop() {
+                    if (Math.abs(current - distance) < threshold) {
+                        correctIterations++;
+                    } else {
+                        correctIterations = 0;
+                    }
+
+                    if (correctIterations >= threshold) {
+                        distancePID.disable();
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+
+                @Override
+                public void firstLoop() {
+                    distancePID.enable();
+                    distancePID.setSetpoint(distance);
+                    turningPID.enable();
+                    turningPID.setSetpoint(0);
+                }
+                
+                @Override
+                public void runLoop() {
+                    current = encoderInput.get();
+                    drivetrain.arcadeDrive(speedOutput.get(), turnOutput.get());
+                }
+            };
+        }
+    }
+
+    private static class TurnCommand implements RuntimeCommand {
+        @Override
+        public Command getCommand(List<String> args) {
+            int angle = Integer.parseInt(args.get(0));
+            final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
+
+            return new LoopingCommand() {
+                double current = 0;
+                int correctIterations = 0;
+
+                @Override
+                public boolean continueLoop() {
+                    if (Math.abs(current - angle) < threshold) {
+                        correctIterations++;
+                    } else {
+                        correctIterations = 0;
+                    }
+
+                    if (correctIterations >= threshold) {
+                        turningPID.disable();
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+                
+                @Override
+                public void firstLoop() {
+                    turningPID.enable();
+                    turningPID.setSetpoint(angle);
+                }
+                
+                @Override
+                public void runLoop() {
+                    current = navx.getAngle();
+                    try {
+                        turningPID.wait(100);
+                    } catch (InterruptedException e) {}
+                    drivetrain.arcadeDrive(0, (turnOutput.get() * TURN_SPEED_COEFFICIENT));
+                }
+            };
+        }
+    }
+
     private static class StopCommand implements RuntimeCommand {
         @Override
         public Command getCommand(List<String> args) {
@@ -201,7 +242,6 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
         }
     }
 
-    
     private static class WaitUntil implements RuntimeCommand {
 
         @Override
@@ -214,10 +254,11 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
                     while (DriverStation.getInstance().getMatchTime() < time) {
                         drivetrain.stopMotor();
                     }
-                }  
+                }
             };
         }
     }
+
     private static class DeployBucket implements RuntimeCommand, Bucket {
         @Override
         public Command getCommand(List<String> args) {

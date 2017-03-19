@@ -11,6 +11,7 @@ import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
 import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
+import edu.first.module.joysticks.BindingJoystick;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
@@ -49,19 +50,39 @@ public class Robot extends IterativeRobotAdapter {
         controller1.addDeadband(XboxController.RIGHT_X, 0.20);
         controller1.invertAxis(XboxController.RIGHT_X);
         controller1.changeAxis(XboxController.RIGHT_X, turnFunction);
-
-        controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(), controller1.getRightX()) {
-            @Override
-            public void doBind(double speed, double turn) {
-                if (turn == 0 && speed == 0) {
-                    drivetrain.stopMotor();
-                } else {
-                    turn += (speed > 0) ? DRIVE_COMPENSATION : 0;
-                    drivetrain.arcadeDrive(speed, turn);
+        
+        if (MANUAL_CONTROL) {
+            controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(), controller1.getRightX()) {
+                @Override
+                public void doBind(double speed, double turn) {
+                    if (turn == 0 && speed == 0) {
+                        drivetrain.stopMotor();
+                    } else {
+                        turn += (speed > 0) ? DRIVE_COMPENSATION : 0;
+                        drivetrain.arcadeDrive(speed, turn);
+                    }
                 }
-
-            }
-        });
+            });
+        } else {
+            controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(), controller1.getRightX()) {
+                double angleAccumulation = 0;
+                
+                @Override
+                public void doBind(double speed, double turn) {
+                    if (turn == 0 && speed == 0) {
+                        drivetrain.stopMotor();
+                    } else {
+                        angleAccumulation += turn * TURN_SPEED_COEFFICIENT;
+                        turningPID.setSetpoint(angleAccumulation);
+                        try {
+                            turningPID.wait(20);
+                        } catch (InterruptedException e) {}
+                        drivetrain.arcadeDrive(speed, turnOutput.get());
+                    }
+                }
+            });
+        }
+        
 
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
@@ -89,7 +110,6 @@ public class Robot extends IterativeRobotAdapter {
                 throw new Error(e.getMessage());
             }
         }
-       
         Timer.delay(1);
     }
 

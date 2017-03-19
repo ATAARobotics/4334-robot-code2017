@@ -41,6 +41,7 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
         COMMANDS.put("print", new PrintCommand());
         COMMANDS.put("drive", new DriveCommand());
         COMMANDS.put("driveDistance", new DriveDistanceCommand());
+        COMMANDS.put("driveStraight", new DriveStraightCommand());
         COMMANDS.put("turn", new TurnCommand());
         COMMANDS.put("stop", new StopCommand());
         COMMANDS.put("wait", new Wait());
@@ -384,6 +385,7 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
     }
 
     private static class CommandGroupFactory extends CommandGroup {
-        public CommandGroupFactory() {}
+        public CommandGroupFactory() {
+        }
     }
 }

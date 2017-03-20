@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.SPI;
 public interface TunedDrive extends Drive {
     EncoderModule leftEncoder = new EncoderModule(LEFT_ENCODER_1, LEFT_ENCODER_2, InputType.DISTANCE);
     EncoderModule rightEncoder = new EncoderModule(RIGHT_ENCODER_1, RIGHT_ENCODER_2, InputType.DISTANCE);
-    
+
     AHRS navx = new AHRS(SPI.Port.kMXP);
 
     public class DualEncoderInput implements Input {
@@ -28,13 +28,7 @@ public interface TunedDrive extends Drive {
 
         @Override
         public double get() {
-            if (left.getRate() == 0) {
-                return right.get();
-            } else if (right.getRate() == 0) {
-                return left.get();
-            } else {
-                return right.get() + left.get();
-            }
+            return right.get() + left.get();
         }
     }
 

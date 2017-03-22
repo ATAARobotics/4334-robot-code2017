@@ -1,6 +1,7 @@
 package ca.fourthreethreefour.settings;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +33,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  * add any custom commands in the static {} block below, look at
  * PrintCommand for an example
  */
-public class AutoFile extends SettingsFile implements Drive, TunedDrive {
+public class AutoFile implements Drive, TunedDrive {
     private static final long serialVersionUID = 5658050910302255585L;
     public static final HashMap<String, RuntimeCommand> COMMANDS = new HashMap<>();
 
@@ -306,32 +307,74 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
             };
         }
     }
+    
+    public static class Entry {
+        final String key, value;
 
+        public Entry(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+    private List<Entry> entries;
+    
     public AutoFile(File file) throws IOException {
-        super(file);
+        
+        String contents;
+        try (FileInputStream fi = new FileInputStream(new File("/" + AUTO_TYPE + ".txt"))) {
+            StringBuilder builder = new StringBuilder();
+            int ch;
+            while ((ch = fi.read()) != -1) {
+                builder.append((char) ch);
+            }
+            contents = builder.toString();
+        }
+        entries = parse(contents);
+    }
+
+    private List<Entry> parse(String contents) {
+        List<Entry> entries = new ArrayList<>();
+
+        for (String line : contents.split("\n")) {
+            if (line.trim().length() == 0) {
+                continue;
+            } else if (line.contains("=")) {
+                String key = line.substring(0, line.indexOf('=')).trim().toLowerCase();
+                String value = line.substring(line.indexOf('=') + 1).trim().toLowerCase();
+                entries.add(new Entry(key, value));
+            } else {
+                String key = line.substring(0, line.indexOf('(')).trim().toLowerCase();
+                String value = line.substring(line.indexOf('(') + 1, line.lastIndexOf(')')).trim().toLowerCase();
+
+                if (value.startsWith("(")) {
+                    value = value.substring(1);
+                }
+                
+                if (value.endsWith(")")) {
+                    value = value.substring(0, value.length() - 1);
+                }
+                entries.add(new Entry(key, value));
+            }
+        }
+        return entries;
     }
 
     public Command toCommand() {
         Map<String, String> variables = new HashMap<>();
-        for (Map.Entry<Object, Object> e : entrySet()) {
-            String key = e.getKey().toString(), value = e.getValue().toString();
-            if (!key.contains("-")) {
-                variables.put(key, value);
-            }
+        for (Entry e : entries) {
+            variables.put(e.key, e.value);
         }
 
         ArrayList<AutoFileCommand> commands = new ArrayList<>();
-        for (Map.Entry<Object, Object> e : entrySet()) {
-            String key = e.getKey().toString(), value = e.getValue().toString();
-            if (variables.containsKey(value)) {
-                value = variables.get(value);
+        for (Entry e : entries) {
+            String value = e.value;
+            for (Map.Entry<String, String> variable : variables.entrySet()) {
+                if (value.contains(variable.getKey())) {
+                    value = value.replace(variable.getKey(), variable.getValue());
+                }
             }
-
-            if (key.contains("-")) {
-                commands.add(new AutoFileCommand(key, value));
-            }
+            commands.add(new AutoFileCommand(e.key, value));
         }
-        Collections.sort(commands);
 
         CommandGroup group = new CommandGroupFactory();
         for (AutoFileCommand command : commands) {
@@ -350,20 +393,17 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
     }
 
     private static class AutoFileCommand implements Comparable<AutoFileCommand> {
-        public final int index;
         public final boolean concurrent;
         public final String name;
         public final List<String> arguments;
 
         public AutoFileCommand(String key, String arguments) {
-            this.index = Integer.parseInt(key.substring(0, key.indexOf('-')));
-            String keyname = key.substring(key.indexOf('-') + 1).toLowerCase();
-            if (keyname.startsWith("!")) {
+            if (key.startsWith("!")) {
                 this.concurrent = true;
-                this.name = keyname.substring(1);
+                this.name = key.substring(1);
             } else {
                 this.concurrent = false;
-                this.name = keyname;
+                this.name = key;
             }
             
             String inner = arguments;
@@ -375,7 +415,7 @@ public class AutoFile extends SettingsFile implements Drive, TunedDrive {
 
         @Override
         public int compareTo(AutoFileCommand o) {
-            return index - o.index;
+            return 0;
         }
     }
 

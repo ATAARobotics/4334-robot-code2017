@@ -395,12 +395,13 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
             this.value = value;
         }
     }
-    private List<Entry> entries;
-    
+
+    private List<Entry> entries = new ArrayList<>();
+    private Map<String, String> variables = new HashMap<>();
+
     public AutoFile(File file) throws IOException {
-        
         String contents;
-        try (FileInputStream fi = new FileInputStream(new File("/" + AUTO_TYPE + ".txt"))) {
+        try (FileInputStream fi = new FileInputStream(file)) {
             StringBuilder builder = new StringBuilder();
             int ch;
             while ((ch = fi.read()) != -1) {
@@ -408,19 +409,14 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
             }
             contents = builder.toString();
         }
-        entries = parse(contents);
-    }
-
-    private List<Entry> parse(String contents) {
-        List<Entry> entries = new ArrayList<>();
 
         for (String line : contents.split("\n")) {
             if (line.trim().length() == 0) {
                 continue;
             } else if (line.contains("=")) {
-                String key = line.substring(0, line.indexOf('=')).trim().toLowerCase();
+                String key = line.substring(0, line.indexOf('=') + 1).trim().toLowerCase();
                 String value = line.substring(line.indexOf('=') + 1).trim().toLowerCase();
-                entries.add(new Entry(key, value));
+                variables.put(key, value);
             } else {
                 String key = line.substring(0, line.indexOf('(')).trim().toLowerCase();
                 String value = line.substring(line.indexOf('(') + 1, line.lastIndexOf(')')).trim().toLowerCase();
@@ -428,22 +424,17 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                 if (value.startsWith("(")) {
                     value = value.substring(1);
                 }
-                
+
                 if (value.endsWith(")")) {
                     value = value.substring(0, value.length() - 1);
                 }
+
                 entries.add(new Entry(key, value));
             }
         }
-        return entries;
     }
 
     public Command toCommand() {
-        Map<String, String> variables = new HashMap<>();
-        for (Entry e : entries) {
-            variables.put(e.key, e.value);
-        }
-
         ArrayList<AutoFileCommand> commands = new ArrayList<>();
         for (Entry e : entries) {
             String value = e.value;
@@ -452,6 +443,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     value = value.replace(variable.getKey(), variable.getValue());
                 }
             }
+
             commands.add(new AutoFileCommand(e.key, value));
         }
 
@@ -471,7 +463,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
         return group;
     }
 
-    private static class AutoFileCommand implements Comparable<AutoFileCommand> {
+    private static class AutoFileCommand {
         public final boolean concurrent;
         public final String name;
         public final List<String> arguments;
@@ -490,11 +482,6 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                 inner = arguments.substring(arguments.indexOf('(') + 1, arguments.indexOf(')'));
             }
             this.arguments = Arrays.asList(inner.split(",")).stream().map(String::trim).collect(Collectors.toList());
-        }
-
-        @Override
-        public int compareTo(AutoFileCommand o) {
-            return 0;
         }
     }
 

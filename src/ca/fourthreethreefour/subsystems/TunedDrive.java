@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj.SPI;
 public interface TunedDrive extends Drive {
     EncoderModule leftEncoder = new EncoderModule(LEFT_ENCODER_1, LEFT_ENCODER_2, InputType.DISTANCE);
     EncoderModule rightEncoder = new EncoderModule(RIGHT_ENCODER_1, RIGHT_ENCODER_2, InputType.DISTANCE);
-
+    
     AHRS navx = new AHRS(SPI.Port.kMXP);
 
     public class DualEncoderInput implements Input {
@@ -60,7 +60,7 @@ public interface TunedDrive extends Drive {
     InOut speedOutput = new VolatileInOut();
     InOut turnOutput = new VolatileInOut();
 
-    PIDController distancePID = new PIDController(encoderInput, speedOutput);
+    PIDController distancePID = new PIDController(encoderInput, speedOutput, DISTANCE_P, DISTANCE_I, DISTANCE_D);
     PIDController turningPID = new PIDController(turnInput, turnOutput, TURN_P, TURN_I, TURN_D);
 
     Subsystem tunedDrive = new Subsystem(new Module[] { leftEncoder, rightEncoder });

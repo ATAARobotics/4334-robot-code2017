@@ -37,9 +37,12 @@ public abstract class LoopingCommand implements Command {
                 runLoop();
             }
         }
+        
+        end();
     }
 
     public void firstLoop() {}
+    public void end() {}
 
     /**
      * Returns whether the loop should run again.

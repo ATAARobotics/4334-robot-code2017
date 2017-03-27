@@ -5,12 +5,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import ca.fourthreethreefour.Robot;
 import ca.fourthreethreefour.subsystems.Bucket;
 import ca.fourthreethreefour.subsystems.Drive;
 import ca.fourthreethreefour.subsystems.GearGuard;
@@ -21,6 +21,8 @@ import edu.first.commands.common.LoopingCommand;
 import edu.first.commands.common.SetOutput;
 import edu.first.commands.common.WaitCommand;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /*
  * driveSpeed = 0.43
@@ -34,15 +36,14 @@ import edu.wpi.first.wpilibj.DriverStation;
  * add any custom commands in the static {} block below, look at
  * PrintCommand for an example
  */
-public class AutoFile implements Drive, TunedDrive {
-    private static final long serialVersionUID = 5658050910302255585L;
+public class AutoFile extends Robot implements Drive, TunedDrive {
     public static final HashMap<String, RuntimeCommand> COMMANDS = new HashMap<>();
 
     static {
         COMMANDS.put("print", new PrintCommand());
         COMMANDS.put("drive", new DriveCommand());
-        COMMANDS.put("driveDistance", new DriveDistanceCommand());
-        COMMANDS.put("driveStraight", new DriveStraightCommand());
+        COMMANDS.put("drivedistance", new DriveDistanceCommand());
+        COMMANDS.put("drivestraight", new DriveStraightCommand());
         COMMANDS.put("turn", new TurnCommand());
         COMMANDS.put("stop", new StopCommand());
         COMMANDS.put("wait", new Wait());
@@ -51,6 +52,51 @@ public class AutoFile implements Drive, TunedDrive {
         COMMANDS.put("retractbucket", new RetractBucket());
         COMMANDS.put("closeguard", new CloseGuard());
         COMMANDS.put("openguard", new OpenGuard());
+    }
+
+    private static class Timeout {
+        private long start = 0;
+        private long timeout;
+
+        public Timeout(long timeout) {
+            this.timeout = timeout;
+        }
+
+        public boolean started() {
+            return start != 0;
+        }
+
+        public void start() {
+            start = System.currentTimeMillis();
+        }
+
+        public boolean done() {
+            return System.currentTimeMillis() - start > timeout;
+        }
+    }
+
+    private static abstract class LoopingCommandWithTimeout extends LoopingCommand {
+        private Timeout timeout;
+
+        public LoopingCommandWithTimeout(Timeout timeout) {
+            this.timeout = timeout;
+        }
+
+        @Override
+        public boolean continueLoop() {
+            // not autonomous anymore
+            if (!DriverStation.getInstance().isAutonomous() || !DriverStation.getInstance().isEnabled()) {
+                return false;
+            }
+            if (!timeout.started()) {
+                timeout.start();
+            }
+            
+            if (timeout.done()) {
+                System.out.println(this.getClass().getSimpleName() + " timed out");
+            }
+            return !timeout.done();
+        }
     }
 
     private static class PrintCommand implements RuntimeCommand {
@@ -70,25 +116,13 @@ public class AutoFile implements Drive, TunedDrive {
         public Command getCommand(List<String> args) {
             double left = Double.parseDouble(args.get(0));
             double right = Double.parseDouble(args.get(1));
-            double timeout = Long.parseLong(args.get(2));
+            Timeout timeout = new Timeout(Long.parseLong(args.get(2)));
 
             if (args.size() != 3) {
                 throw new IllegalArgumentException("Error in Drive: Invalid arguments");
             }
 
-            return new LoopingCommand() {
-                long start = 0;
-
-                @Override
-                public boolean continueLoop() {
-                    if (start == 0) {
-                        start = System.currentTimeMillis();
-                        return timeout != 0;
-                    } else {
-                        return System.currentTimeMillis() - start < timeout;
-                    }
-                }
-
+            return new LoopingCommandWithTimeout(timeout) {
                 @Override
                 public void runLoop() {
                     drivetrain.set(left, right);
@@ -101,39 +135,50 @@ public class AutoFile implements Drive, TunedDrive {
         @Override
         public Command getCommand(List<String> args) {
             int distance = Integer.parseInt(args.get(0));
-            final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
+            double compensation = Double.parseDouble(args.get(1));
+            final int threshold = args.size() > 2 ? Integer.parseInt(args.get(2)) : 10;
+            Timeout timeout = new Timeout(args.size() > 3 ? Integer.parseInt(args.get(3)) : 8000L);
 
-            return new LoopingCommand() {
-                double current = 0;
+            return new LoopingCommandWithTimeout(timeout) {
                 int correctIterations = 0;
 
                 @Override
                 public boolean continueLoop() {
-                    if (Math.abs(current - distance) < threshold) {
+                    // timeout/auto check
+                    if (!super.continueLoop()) {
+                        return false;
+                    }
+
+                    if (distancePID.isEnabled() && distancePID.onTarget()) {
                         correctIterations++;
                     } else {
                         correctIterations = 0;
                     }
-
-                    if (correctIterations >= threshold) {
-                        distancePID.disable();
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    
+                    return correctIterations < threshold;
                 }
 
                 @Override
                 public void firstLoop() {
-                    distancePID.enable();
                     distancePID.setSetpoint(distance);
+                    distancePID.enable();
+                }
+
+                @Override
+                public void runLoop() {
+                    try {
+                        distancePID.wait(20);
+                    } catch (InterruptedException e) {}
+                    SmartDashboard.putNumber("encoder", distancePID.getError());
+                    double output = speedOutput.get();
+                    drivetrain.set(output + compensation, output - compensation);
                 }
                 
                 @Override
-                public void runLoop() {
-                    current = encoderInput.get();
-                    double output = speedOutput.get();
-                    drivetrain.set(output, output);
+                public void end() {
+                    distancePID.disable();
+                    leftEncoder.reset();
+                    rightEncoder.reset();
                 }
             };
         }
@@ -144,39 +189,60 @@ public class AutoFile implements Drive, TunedDrive {
         public Command getCommand(List<String> args) {
             int distance = Integer.parseInt(args.get(0));
             final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
+            Timeout timeout = new Timeout(args.size() > 2 ? Integer.parseInt(args.get(2)) : 8000L);
 
-            return new LoopingCommand() {
-                double current = 0;
+            return new LoopingCommandWithTimeout(timeout) {
                 int correctIterations = 0;
 
                 @Override
                 public boolean continueLoop() {
-                    if (Math.abs(current - distance) < threshold) {
+                    // not autonomous anymore
+                    if (!super.continueLoop()) {
+                        return false;
+                    }
+
+                    if (distancePID.isEnabled() && distancePID.onTarget()) {
                         correctIterations++;
                     } else {
                         correctIterations = 0;
                     }
 
-                    if (correctIterations >= threshold) {
-                        distancePID.disable();
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    // if (correctIterations > 0)
+                        //System.out.printf("drive %d / %d\n", correctIterations, threshold);
+                    return correctIterations < threshold;
                 }
 
                 @Override
                 public void firstLoop() {
-                    distancePID.enable();
+                    leftEncoder.reset();
+                    rightEncoder.reset();
                     distancePID.setSetpoint(distance);
+                    distancePID.enable();
+
+                    double angle = navx.getAngle();
+                    turningPID.setSetpoint(angle);
                     turningPID.enable();
-                    turningPID.setSetpoint(0);
+
+                    System.out.printf("drivestraight setpoint: %f \n", distancePID.getSetpoint());
+                }
+
+                @Override
+                public void runLoop() {
+                    synchronized (distancePID) {
+                        try {
+                            distancePID.wait(20);
+                        } catch (InterruptedException e) {}
+                    }
+                    
+                    SmartDashboard.putNumber("encoder", distancePID.getError());
+                    drivetrain.arcadeDrive(speedOutput.get(), turnOutput.get());
                 }
                 
                 @Override
-                public void runLoop() {
-                    current = encoderInput.get();
-                    drivetrain.arcadeDrive(speedOutput.get(), turnOutput.get());
+                public void end() {
+                    System.out.println("drivestraight ended");
+                    distancePID.disable();
+                    turningPID.disable();
                 }
             };
         }
@@ -185,42 +251,54 @@ public class AutoFile implements Drive, TunedDrive {
     private static class TurnCommand implements RuntimeCommand {
         @Override
         public Command getCommand(List<String> args) {
-            int angle = Integer.parseInt(args.get(0));
+            double angle = Double.parseDouble(args.get(0));
             final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
+            Timeout timeout = new Timeout(args.size() > 2 ? Integer.parseInt(args.get(2)) : 8000L);
 
-            return new LoopingCommand() {
-                double current = 0;
+            return new LoopingCommandWithTimeout(timeout) {
                 int correctIterations = 0;
 
                 @Override
                 public boolean continueLoop() {
-                    if (Math.abs(current - angle) < threshold) {
+                    if (!super.continueLoop()) {
+                        return false;
+                    }
+
+                    if (turningPID.isEnabled() && turningPID.onTarget()) {
+                        // System.out.printf("err %f / thresh %f\n", turningPID.getError(), turningPID.getTolerance());
                         correctIterations++;
                     } else {
                         correctIterations = 0;
                     }
 
-                    if (correctIterations >= threshold) {
-                        turningPID.disable();
-                        return false;
-                    } else {
-                        return true;
-                    }
+                    // if (correctIterations > 0)
+                        // System.out.printf("turn %d / %d\n", correctIterations, threshold);
+                    return correctIterations < threshold;
                 }
-                
+
                 @Override
                 public void firstLoop() {
-                    turningPID.enable();
+                    navx.reset();
+                    System.out.println("turn started");
                     turningPID.setSetpoint(angle);
+                    turningPID.enable();
+                }
+
+                @Override
+                public void runLoop() {
+                    synchronized (turningPID) {
+                        try {
+                            turningPID.wait(20);
+                        } catch (InterruptedException e) {} //no
+                    }
+                    SmartDashboard.putNumber("gyro", turningPID.getError());
+                    drivetrain.arcadeDrive(0, turnOutput.get());
                 }
                 
                 @Override
-                public void runLoop() {
-                    current = navx.getAngle();
-                    try {
-                        turningPID.wait(100);
-                    } catch (InterruptedException e) {}
-                    drivetrain.arcadeDrive(0, (turnOutput.get() * TURN_SPEED_COEFFICIENT));
+                public void end() {
+                    System.out.println("turn ended");
+                    turningPID.disable();
                 }
             };
         }
@@ -308,7 +386,7 @@ public class AutoFile implements Drive, TunedDrive {
             };
         }
     }
-    
+
     public static class Entry {
         final String key, value;
 

@@ -4,6 +4,7 @@ import edu.first.identifiers.Input;
 import edu.first.identifiers.Output;
 import edu.first.identifiers.PositionalActuator;
 import edu.first.identifiers.PositionalSensor;
+import edu.wpi.first.wpilibj.DriverStation;
 
 /**
  * Controller that uses the PID algorithm to handle input and output. This class
@@ -32,7 +33,7 @@ public class PIDController extends Controller implements PositionalSensor, Posit
     private final Input input;
     private final Output output;
     private double P, I, D;
-    private double minimumInput = Double.MIN_VALUE, maximumInput = Double.MAX_VALUE;
+    private double minimumInput = -1000000000, maximumInput = Double.MAX_VALUE;
     private double minimumOutput = -1, maximumOutput = +1;
     // Controller variables
     // uses lock so user can't lock controller accidentally using "this"
@@ -426,7 +427,10 @@ public class PIDController extends Controller implements PositionalSensor, Posit
             prevError = error;
             prevResult = result;
             totalError = sTotalError;
-            notifyAll();
+        }
+        
+        synchronized (this) {
+            this.notifyAll();
         }
     }
 

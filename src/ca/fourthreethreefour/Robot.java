@@ -18,7 +18,6 @@ import edu.first.robot.IterativeRobotAdapter;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobotAdapter {
-
     private final Subsystem AUTO_MODULES = new Subsystem(
             new Module[] { drive, bucket, gearGuard, tunedDrive });
 
@@ -43,6 +42,8 @@ public class Robot extends IterativeRobotAdapter {
 
         ALL_MODULES.init();
         drivetrain.setExpiration(0.1);
+        turningPID.setTolerance(TURN_TOLERANCE);
+        distancePID.setTolerance(DISTANCE_TOLERANCE);
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
         controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);

@@ -66,19 +66,20 @@ public class Robot extends IterativeRobotAdapter {
             });
         } else {
             controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(), controller1.getRightX()) {
-                double angleAccumulation = 0;
+                boolean isTurning = true;
                 
                 @Override
                 public void doBind(double speed, double turn) {
-                    if (turn == 0 && speed == 0) {
-                        drivetrain.stopMotor();
-                    } else {
-                        angleAccumulation += turn * TURN_SPEED_COEFFICIENT;
-                        turningPID.setSetpoint(angleAccumulation);
-                        try {
-                            turningPID.wait(20);
-                        } catch (InterruptedException e) {}
+                    if (turn == 0) {
+                        if (isTurning) {
+                            isTurning = false;
+                            turningPID.setSetpoint(navx.getAngle());
+                        }
+
                         drivetrain.arcadeDrive(speed, turnOutput.get());
+                    } else {
+                        isTurning = true;
+                        drivetrain.arcadeDrive(speed, turn);
                     }
                 }
             });
@@ -137,6 +138,8 @@ public class Robot extends IterativeRobotAdapter {
         if (gearGuard.get() == Direction.OFF) {
             gearGuard.set(DualActionSolenoid.Direction.LEFT);
         }
+        
+        turningPID.enable();
     }
 
     @Override
@@ -150,7 +153,9 @@ public class Robot extends IterativeRobotAdapter {
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
-
+        //SmartDashboard.putNumber("Turning PID", turningPID.get());
+        //SmartDashboard.putNumber("Turning Error", turningPID.getError());
+        //SmartDashboard.putNumber("Turning Setpoint", turningPID.getSetpoint());
         //SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
         //SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
         // SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());

@@ -14,10 +14,15 @@ public interface Settings {
     double TURN_CURVE = settingsFile.getDoubleProperty("TURN_CURVE", 1.5);
     double TURN_CONSTANT = settingsFile.getDoubleProperty("TURN_CONSTANT", 1);
     
+    double DISTANCE_P = settingsFile.getDoubleProperty("DISTANCE_P", 0.0012);
+    double DISTANCE_I = settingsFile.getDoubleProperty("DISTANCE_I", 0);
+    double DISTANCE_D = settingsFile.getDoubleProperty("DISTANCE_D", 0.007);
+    double DISTANCE_TOLERANCE = settingsFile.getDoubleProperty("DISTANCE_TOLERANCE", 5);
+    
     double TURN_P = settingsFile.getDoubleProperty("TURN_P", 0);
     double TURN_I = settingsFile.getDoubleProperty("TURN_I", 0);
     double TURN_D = settingsFile.getDoubleProperty("TURN_D", 0);
-    double TURN_SPEED_COEFFICIENT = settingsFile.getDoubleProperty("TURN_SPEED_COEFFICIENT", 1);
+    double TURN_TOLERANCE = settingsFile.getDoubleProperty("TURN_TOLERANCE", 5);
 
     int DRIVE_RIGHT_1 = settingsFile.getIntProperty("DRIVE_RIGHT_1", 3);
     int DRIVE_RIGHT_2 = settingsFile.getIntProperty("DRIVE_RIGHT_2", 4);

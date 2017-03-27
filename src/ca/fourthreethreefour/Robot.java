@@ -18,7 +18,6 @@ import edu.first.robot.IterativeRobotAdapter;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobotAdapter {
-
     private final Subsystem AUTO_MODULES = new Subsystem(
             new Module[] { drive, bucket, gearGuard, tunedDrive });
 
@@ -44,7 +43,9 @@ public class Robot extends IterativeRobotAdapter {
         ALL_MODULES.init();
         drivetrain.setExpiration(0.1);
         drivetrain.setReversed(true);
-//        allianceSwitch.init();
+        
+        turningPID.setTolerance(TURN_TOLERANCE);
+        distancePID.setTolerance(DISTANCE_TOLERANCE);
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
         controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);
@@ -66,19 +67,20 @@ public class Robot extends IterativeRobotAdapter {
             });
         } else {
             controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(), controller1.getRightX()) {
-                double angleAccumulation = 0;
+                boolean isTurning = true;
                 
                 @Override
                 public void doBind(double speed, double turn) {
-                    if (turn == 0 && speed == 0) {
-                        drivetrain.stopMotor();
-                    } else {
-                        angleAccumulation += turn * TURN_SPEED_COEFFICIENT;
-                        turningPID.setSetpoint(angleAccumulation);
-                        try {
-                            turningPID.wait(20);
-                        } catch (InterruptedException e) {}
+                    if (turn == 0) {
+                        if (isTurning) {
+                            isTurning = false;
+                            turningPID.setSetpoint(navx.getAngle());
+                        }
+
                         drivetrain.arcadeDrive(speed, turnOutput.get());
+                    } else {
+                        isTurning = true;
+                        drivetrain.arcadeDrive(speed, turn);
                     }
                 }
             });
@@ -136,6 +138,8 @@ public class Robot extends IterativeRobotAdapter {
         if (gearGuard.get() == Direction.OFF) {
             gearGuard.set(DualActionSolenoid.Direction.LEFT);
         }
+        
+        turningPID.enable();
     }
 
     @Override
@@ -149,7 +153,9 @@ public class Robot extends IterativeRobotAdapter {
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
-
+        //SmartDashboard.putNumber("Turning PID", turningPID.get());
+        //SmartDashboard.putNumber("Turning Error", turningPID.getError());
+        //SmartDashboard.putNumber("Turning Setpoint", turningPID.getSetpoint());
         //SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
         //SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
         // SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());

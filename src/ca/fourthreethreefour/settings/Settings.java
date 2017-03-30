@@ -34,13 +34,14 @@ public interface Settings {
     int LEFT_ENCODER_2 = settingsFile.getIntProperty("LEFT_ENCODER_2", 1);
     int RIGHT_ENCODER_1 = settingsFile.getIntProperty("RIGHT_ENCODER_1", 2);
     int RIGHT_ENCODER_2 = settingsFile.getIntProperty("RIGHT_ENCODER_2", 3);
-    int CLIMBER_1 = settingsFile.getIntProperty("CLIMBER_1", 8);
-    int CLIMBER_2 = settingsFile.getIntProperty("CLIMBER_2", 9);
+    int CLIMBER_1 = settingsFile.getIntProperty("CLIMBER_1", 6);
+    int CLIMBER_2 = settingsFile.getIntProperty("CLIMBER_2", 7);
     int GEARGUARD_1 = settingsFile.getIntProperty("GEARGUARD_1", 2);
     int GEARGUARD_2 = settingsFile.getIntProperty("GEARGUARD_2", 3);
     int INDICATOR = settingsFile.getIntProperty("INDICATOR", 0);
     int BUCKET_SOLENOID_PORT_1 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_1", 0);
     int BUCKET_SOLENOID_PORT_2 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_2", 1);
+    int GROUND_INTAKE = settingsFile.getIntProperty("GROUND_INTAKE", 8);
     //int BUCKET_SWITCH = settingsFile.getIntProperty("BUCKET_SWITCH", 0);
     int CONTROLLER_1 = settingsFile.getIntProperty("CONTROLLER_1", 0);
     int CONTROLLER_2 = settingsFile.getIntProperty("CONTROLLER_2", 1);

@@ -134,13 +134,15 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
     private static class DriveDistanceCommand implements RuntimeCommand {
         @Override
         public Command getCommand(List<String> args) {
-            int distance = Integer.parseInt(args.get(0));
-            double compensation = Double.parseDouble(args.get(1));
-            final int threshold = args.size() > 2 ? Integer.parseInt(args.get(2)) : 10;
-            Timeout timeout = new Timeout(args.size() > 3 ? Integer.parseInt(args.get(3)) : 8000L);
+            int leftDistance = Integer.parseInt(args.get(0));
+            int rightDistance = Integer.parseInt(args.get(1));
+            double compensation = Double.parseDouble(args.get(2));
+            final int threshold = args.size() > 2 ? Integer.parseInt(args.get(3)) : 10;
+            Timeout timeout = new Timeout(args.size() > 3 ? Integer.parseInt(args.get(4)) : 8000L);
 
             return new LoopingCommandWithTimeout(timeout) {
-                int correctIterations = 0;
+                int leftCorrectIterations = 0;
+                int rightCorrectIterations = 0;
 
                 @Override
                 public boolean continueLoop() {
@@ -149,34 +151,50 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                         return false;
                     }
 
-                    if (distancePID.isEnabled() && distancePID.onTarget()) {
-                        correctIterations++;
+                    if (leftDistancePID.isEnabled() && leftDistancePID.onTarget()) {
+                        leftCorrectIterations++;
                     } else {
-                        correctIterations = 0;
+                        leftCorrectIterations = 0;
                     }
                     
-                    return correctIterations < threshold;
+                    if (rightDistancePID.isEnabled() && rightDistancePID.onTarget()) {
+                        rightCorrectIterations++;
+                    } else {
+                        rightCorrectIterations = 0;
+                    }
+                    
+                    if (leftCorrectIterations < threshold && rightCorrectIterations < threshold) {
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
 
                 @Override
                 public void firstLoop() {
-                    distancePID.setSetpoint(distance);
-                    distancePID.enable();
+                    leftDistancePID.setSetpoint(leftDistance);
+                    rightDistancePID.setSetpoint(rightDistance);
+                    leftDistancePID.enable();
+                    rightDistancePID.enable();
                 }
 
                 @Override
                 public void runLoop() {
                     try {
-                        distancePID.wait(20);
+                        leftDistancePID.wait(20);
                     } catch (InterruptedException e) {}
-                    SmartDashboard.putNumber("encoder", distancePID.getError());
-                    double output = speedOutput.get();
-                    drivetrain.set(output + compensation, output - compensation);
+                    
+                    try {
+                        rightDistancePID.wait(20);
+                    } catch (InterruptedException e) {}
+                    
+                    drivetrain.set(leftSpeedOutput.get() + compensation, rightSpeedOutput.get() - compensation);
                 }
                 
                 @Override
                 public void end() {
-                    distancePID.disable();
+                    leftDistancePID.disable();
+                    rightDistancePID.disable();
                     leftEncoder.reset();
                     rightEncoder.reset();
                 }
@@ -206,9 +224,16 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     } else {
                         correctIterations = 0;
                     }
+                    
+                    if (distancePID.isEnabled() && distancePID.onTarget()) {
+                        correctIterations++;
+                    } else {
+                        correctIterations = 0;
+                    }
 
                     // if (correctIterations > 0)
                         //System.out.printf("drive %d / %d\n", correctIterations, threshold);
+
                     return correctIterations < threshold;
                 }
 

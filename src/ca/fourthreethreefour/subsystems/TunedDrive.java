@@ -58,9 +58,13 @@ public interface TunedDrive extends Drive {
     };
 
     InOut speedOutput = new VolatileInOut();
+    InOut leftSpeedOutput = new VolatileInOut();
+    InOut rightSpeedOutput = new VolatileInOut();
     InOut turnOutput = new VolatileInOut();
 
     PIDController distancePID = new PIDController(encoderInput, speedOutput, DISTANCE_P, DISTANCE_I, DISTANCE_D);
+    PIDController leftDistancePID = new PIDController(leftEncoder, leftSpeedOutput, DISTANCE_P, DISTANCE_I, DISTANCE_D);
+    PIDController rightDistancePID = new PIDController(rightEncoder, rightSpeedOutput, DISTANCE_P, DISTANCE_I, DISTANCE_D);
     PIDController turningPID = new PIDController(turnInput, turnOutput, TURN_P, TURN_I, TURN_D);
 
     Subsystem tunedDrive = new Subsystem(new Module[] { leftEncoder, rightEncoder });

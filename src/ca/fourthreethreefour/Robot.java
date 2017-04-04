@@ -88,8 +88,8 @@ public class Robot extends IterativeRobotAdapter {
 
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
-        controller1.addAxisBind(XboxController.LEFT_TRIGGER, groundIntake);
+        controller1.addAxisBind(XboxController.LEFT_TRIGGER, climberMotors);
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, groundIntake);
     }
     
     private Command autoCommand;

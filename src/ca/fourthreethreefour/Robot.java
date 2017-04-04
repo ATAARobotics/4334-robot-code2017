@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
+import ca.fourthreethreefour.commands.debug.SendSmartDashboard;
 import ca.fourthreethreefour.settings.AutoFile;
 import edu.first.command.Command;
 import edu.first.command.Commands;
@@ -149,11 +150,14 @@ public class Robot extends IterativeRobotAdapter {
         controller2.doBinds();
 //        System.out.println(allianceSwitch.getPosition());
 
-        if (gearGuard.get() == Direction.LEFT && bucketSolenoid.get() == Direction.LEFT) {
+        if (bucketSolenoid.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
+        
+        Commands.run(new SendSmartDashboard("Left Encoder", leftEncoder.get()));
+        Commands.run(new SendSmartDashboard("Right Encoder", rightEncoder.get()));
         //SmartDashboard.putNumber("Turning PID", turningPID.get());
         //SmartDashboard.putNumber("Turning Error", turningPID.getError());
         //SmartDashboard.putNumber("Turning Setpoint", turningPID.getSetpoint());

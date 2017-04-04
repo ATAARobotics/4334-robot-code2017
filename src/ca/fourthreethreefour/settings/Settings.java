@@ -8,8 +8,9 @@ public interface Settings {
     String ROBOT_TYPE = settingsFile.getProperty("ROBOT_TYPE", "");
     boolean AUTO_ALLIANCE_INDEPENDENT = settingsFile.getBooleanProperty("AUTO_ALLIANCE_INDEPENDENT", false);
     String AUTO_TYPE = settingsFile.getProperty("AUTO_TYPE", "");
+    boolean LOGGING_ENABLED = settingsFile.getBooleanProperty("LOGGING_ENABLED", false);
     
-    boolean MANUAL_CONTROL = settingsFile.getBooleanProperty("MANUAL_CONTROL", false);
+    boolean MANUAL_CONTROL = settingsFile.getBooleanProperty("MANUAL_CONTROL", true);
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);
     double TURN_CURVE = settingsFile.getDoubleProperty("TURN_CURVE", 1.5);
     double TURN_CONSTANT = settingsFile.getDoubleProperty("TURN_CONSTANT", 1);

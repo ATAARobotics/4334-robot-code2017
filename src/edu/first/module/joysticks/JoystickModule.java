@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
  */
 public class JoystickModule extends Module.StandardModule implements Joystick {
 
-    private final edu.wpi.first.wpilibj.Joystick joystick;
+    protected final edu.wpi.first.wpilibj.Joystick joystick;
     // stores axises for quick access and not having to instantize everytime
     private Axis[] axises = new Axis[]{
         new RawAxis(0), new RawAxis(1), new RawAxis(2),

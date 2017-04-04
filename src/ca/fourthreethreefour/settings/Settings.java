@@ -23,6 +23,10 @@ public interface Settings {
     double TURN_I = settingsFile.getDoubleProperty("TURN_I", 0);
     double TURN_D = settingsFile.getDoubleProperty("TURN_D", 0);
     double TURN_TOLERANCE = settingsFile.getDoubleProperty("TURN_TOLERANCE", 5);
+    
+    double INTAKE_AMP_THRESHOLD = settingsFile.getDoubleProperty("INTAKE_AMP_THRESHOLD", 9);
+    
+    int INTAKE_PDP_PORT = settingsFile.getIntProperty("INTAKE_PDP_PORT", 4);
 
     int DRIVE_RIGHT_1 = settingsFile.getIntProperty("DRIVE_RIGHT_1", 0);
     int DRIVE_RIGHT_2 = settingsFile.getIntProperty("DRIVE_RIGHT_2", 1);

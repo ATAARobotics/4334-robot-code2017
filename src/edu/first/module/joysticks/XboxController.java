@@ -1,6 +1,8 @@
 package edu.first.module.joysticks;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
 /**
  * The Xbox 360 controller. Is bindable and has custom axises.
@@ -134,6 +136,19 @@ public class XboxController extends BindingJoystick {
      */
     public XboxController(int port, double stickDeadband) {
         this(new Joystick(port), stickDeadband);
+    }
+    
+    public final void rumble(double timeout) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                joystick.setRumble(RumbleType.kLeftRumble, 1);
+                joystick.setRumble(RumbleType.kRightRumble, 1);
+                Timer.delay(timeout);
+                joystick.setRumble(RumbleType.kLeftRumble, 0);
+                joystick.setRumble(RumbleType.kRightRumble, 0);
+            }
+        }).start();
     }
 
     /**

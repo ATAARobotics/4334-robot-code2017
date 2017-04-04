@@ -15,6 +15,7 @@ import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobotAdapter {
@@ -88,8 +89,9 @@ public class Robot extends IterativeRobotAdapter {
 
         controller1.addWhenPressed(XboxController.LEFT_BUMPER, new ReverseDualActionSolenoid(gearGuard));
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, new InversedSpeedController(climberMotors));
-        controller1.addAxisBind(XboxController.LEFT_TRIGGER, groundIntake);
+
+        controller1.addAxisBind(XboxController.LEFT_TRIGGER,  new InversedSpeedController(climberMotors));
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, groundIntake);
     }
     
     private Command autoCommand;
@@ -113,6 +115,7 @@ public class Robot extends IterativeRobotAdapter {
                 throw new Error(e.getMessage());
             }
         }
+        
         Timer.delay(1);
     }
 
@@ -143,6 +146,8 @@ public class Robot extends IterativeRobotAdapter {
         turningPID.enable();
     }
 
+    PowerDistributionPanel panel = new PowerDistributionPanel();
+    
     @Override
     public void periodicTeleoperated() {
         controller1.doBinds();
@@ -154,6 +159,11 @@ public class Robot extends IterativeRobotAdapter {
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
+        
+        if (panel.getCurrent(INTAKE_PDP_PORT) > INTAKE_AMP_THRESHOLD) {
+            controller1.rumble(0.5);
+        }
+        
         //SmartDashboard.putNumber("Turning PID", turningPID.get());
         //SmartDashboard.putNumber("Turning Error", turningPID.getError());
         //SmartDashboard.putNumber("Turning Setpoint", turningPID.getSetpoint());

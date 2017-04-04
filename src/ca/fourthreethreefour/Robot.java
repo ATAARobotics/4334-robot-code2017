@@ -16,14 +16,16 @@ import edu.first.module.joysticks.BindingJoystick;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobotAdapter {
     private final Subsystem AUTO_MODULES = new Subsystem(
-            new Module[] { drive, bucket, gearGuard, tunedDrive });
+            new Module[] { drive, bucket, groundIntake, tunedDrive });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, gearGuard, indicator, controllers });
+            new Module[] { drive, climber, bucket, groundIntake, indicator, controllers });
 
     private final Subsystem ALL_MODULES = new Subsystem(new Module[] { AUTO_MODULES, TELEOP_MODULES });
 
@@ -52,6 +54,8 @@ public class Robot extends IterativeRobotAdapter {
         controller1.addDeadband(XboxController.RIGHT_X, 0.20);
         controller1.invertAxis(XboxController.RIGHT_X);
         controller1.changeAxis(XboxController.RIGHT_X, turnFunction);
+        
+        controller1.addDeadband(XboxController.LEFT_TRIGGER, 0.10);
         
         if (MANUAL_CONTROL) {
             controller1.addAxisBind(new DualAxisBind(controller1.getLeftDistanceFromMiddle(), controller1.getRightX()) {

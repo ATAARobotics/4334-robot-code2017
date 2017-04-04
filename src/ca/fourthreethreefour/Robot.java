@@ -18,6 +18,7 @@ import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobotAdapter {
@@ -92,8 +93,8 @@ public class Robot extends IterativeRobotAdapter {
         
 
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, climberMotors);
-        controller1.addAxisBind(XboxController.LEFT_TRIGGER, groundIntake);
+        controller1.addAxisBind(XboxController.LEFT_TRIGGER, climberMotors);
+        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, groundIntake);
         
         CameraServer.getInstance().startAutomaticCapture(0);
     }
@@ -119,6 +120,7 @@ public class Robot extends IterativeRobotAdapter {
                 throw new Error(e.getMessage());
             }
         }
+        
         Timer.delay(1);
     }
 
@@ -149,6 +151,8 @@ public class Robot extends IterativeRobotAdapter {
         turningPID.enable();
     }
 
+    PowerDistributionPanel panel = new PowerDistributionPanel();
+    
     @Override
     public void periodicTeleoperated() {
         controller1.doBinds();
@@ -160,9 +164,11 @@ public class Robot extends IterativeRobotAdapter {
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
         }
+
+        if (panel.getCurrent(INTAKE_PDP_PORT) > INTAKE_AMP_THRESHOLD) {
+            controller1.rumble(0.5);
+        }
         
-        Commands.run(new SendSmartDashboard("Left Encoder", leftEncoder.get()));
-        Commands.run(new SendSmartDashboard("Right Encoder", rightEncoder.get()));
         //SmartDashboard.putNumber("Turning PID", turningPID.get());
         //SmartDashboard.putNumber("Turning Error", turningPID.getError());
         //SmartDashboard.putNumber("Turning Setpoint", turningPID.getSetpoint());

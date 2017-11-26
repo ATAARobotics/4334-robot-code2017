@@ -4,7 +4,7 @@
  */
 package edu.first.main;
 
-import edu.first.robot.IterativeRobotAdapter;
+import ca.fourthreethreefour.Robot;
 import edu.first.robot.RobotMode;
 import edu.first.robot.SafeRobotMode;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -45,7 +45,7 @@ public final class GamePeriods extends IterativeRobot {
      */
     public GamePeriods() {
         // Init robot mode here so that static initializing doesn't interfere with wpi code
-        robotMode = new SafeRobotMode(new IterativeRobotAdapter("Null"));
+        robotMode = new SafeRobotMode(new Robot("name")); //TODO name the robot
     }
 
     /**

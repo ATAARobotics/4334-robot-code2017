@@ -12,7 +12,7 @@ public interface Climber extends Settings {
 
     VictorModule climber1 = new VictorModule(CLIMBER_1), climber2 = new VictorModule(CLIMBER_2);
 
-    SpeedControllerGroup climberMotors = new SpeedControllerGroup(new SpeedController[] { new InversedSpeedController(climber1), climber2 });
+    SpeedControllerGroup climberMotors = new SpeedControllerGroup(new SpeedController[] { new InversedSpeedController(climber1), new InversedSpeedController(climber2) });
 
     Subsystem climber = new Subsystem(new Module[] { climber1, climber2 });
 }

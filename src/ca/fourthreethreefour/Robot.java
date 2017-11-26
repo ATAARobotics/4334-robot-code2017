@@ -4,19 +4,21 @@ import java.io.File;
 import java.io.IOException;
 
 import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
-import ca.fourthreethreefour.commands.debug.SendSmartDashboard;
+import ca.fourthreethreefour.commands.debug.Logging;
 import ca.fourthreethreefour.settings.AutoFile;
 import edu.first.command.Command;
 import edu.first.command.Commands;
+import edu.first.commands.ThreadedCommand;
+import edu.first.commands.common.LoopingCommand;
+import edu.first.identifiers.InversedSpeedController;
 import edu.first.module.Module;
 import edu.first.module.actuators.DualActionSolenoid;
 import edu.first.module.actuators.DualActionSolenoid.Direction;
+import edu.first.module.joysticks.BindingJoystick.AxisBind;
 import edu.first.module.joysticks.BindingJoystick.DualAxisBind;
-import edu.first.module.joysticks.BindingJoystick;
 import edu.first.module.joysticks.XboxController;
 import edu.first.module.subsystems.Subsystem;
 import edu.first.robot.IterativeRobotAdapter;
-import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Timer;
@@ -26,7 +28,7 @@ public class Robot extends IterativeRobotAdapter {
             new Module[] { drive, bucket, groundIntake, tunedDrive });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, groundIntake, indicator, controllers });
+            new Module[] { drive, climber, bucket, groundIntake, indicator, controllers, tunedDrive });
 
     private final Subsystem ALL_MODULES = new Subsystem(new Module[] { AUTO_MODULES, TELEOP_MODULES });
 
@@ -34,6 +36,8 @@ public class Robot extends IterativeRobotAdapter {
         super("ATA 2017");
     }
 
+    PowerDistributionPanel panel = new PowerDistributionPanel();
+    
     @Override
     public void init() {
         if (ROBOT_TYPE == "") {
@@ -48,6 +52,8 @@ public class Robot extends IterativeRobotAdapter {
         drivetrain.setExpiration(0.1);
         turningPID.setTolerance(TURN_TOLERANCE);
         distancePID.setTolerance(DISTANCE_TOLERANCE);
+        
+        CameraServer.getInstance().startAutomaticCapture();
 
         controller1.addDeadband(XboxController.LEFT_FROM_MIDDLE, 0.20);
         controller1.changeAxis(XboxController.LEFT_FROM_MIDDLE, speedFunction);
@@ -91,12 +97,64 @@ public class Robot extends IterativeRobotAdapter {
             });
         }
         
-
-        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
-        controller1.addAxisBind(XboxController.LEFT_TRIGGER, climberMotors);
-        controller1.addAxisBind(XboxController.RIGHT_TRIGGER, groundIntake);
+        //reverse this
+        AxisBind groundIntakeBind = new AxisBind(controller1.getRightTrigger(), new InversedSpeedController(groundIntake));
+        controller1.addAxisBind(groundIntakeBind);
         
-        CameraServer.getInstance().startAutomaticCapture(0);
+        controller1.addWhilePressed(XboxController.RIGHT_TRIGGER, new Command() {
+
+            @Override
+            public void run() {
+                double intakeCurrentDraw = panel.getCurrent(INTAKE_PDP_PORT);
+                if (intakeCurrentDraw > INTAKE_AMP_THRESHOLD) {
+                    controller1.rumble(0.5);
+                }
+                
+                Logging.put("Intake Current Draw", intakeCurrentDraw);
+            }
+        });
+        
+        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
+
+        // run ground intake when retracting gear
+        final long INTAKE_TIME = 2000L;
+        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ThreadedCommand(new LoopingCommand() {
+            long start = 0;
+            
+            @Override
+            public void firstLoop() {
+                controller1.removeBind(groundIntakeBind);
+            }
+            
+            @Override
+            public void runLoop() {
+                //reverse this
+                new InversedSpeedController(groundIntake).set(1);
+            }
+            
+            @Override
+            public boolean continueLoop() {
+                if (start == 0) {
+                    if (bucketSolenoid.get() == BUCKET_IN) {
+                        return false;
+                    }
+                    
+                    start = System.currentTimeMillis();
+                }
+                return System.currentTimeMillis() - start < INTAKE_TIME;
+            }
+            
+            @Override
+            public void end() {
+                groundIntake.set(0);
+                controller1.addAxisBind(groundIntakeBind);
+                start = 0;
+            }
+        }));
+        
+        controller1.addAxisBind(XboxController.LEFT_TRIGGER, climberMotors);
+        
+        //CameraServer.getInstance().startAutomaticCapture();
     }
     
     private Command autoCommand;
@@ -144,29 +202,21 @@ public class Robot extends IterativeRobotAdapter {
         if (bucketSolenoid.get() == Direction.OFF) {
             bucketSolenoid.set(DualActionSolenoid.Direction.LEFT);
         }
-        if (gearGuard.get() == Direction.OFF) {
-            gearGuard.set(DualActionSolenoid.Direction.LEFT);
-        }
-        
         turningPID.enable();
     }
 
-    PowerDistributionPanel panel = new PowerDistributionPanel();
-    
     @Override
     public void periodicTeleoperated() {
         controller1.doBinds();
-        controller2.doBinds();
 //        System.out.println(allianceSwitch.getPosition());
 
+        Logging.log("left: " + leftEncoder.get() + " right: " + rightEncoder.get() + "\n");
+        Logging.log("turning: " + navx.getAngle() + "\n");
+        
         if (bucketSolenoid.get() == Direction.LEFT) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
-        }
-
-        if (panel.getCurrent(INTAKE_PDP_PORT) > INTAKE_AMP_THRESHOLD) {
-            controller1.rumble(0.5);
         }
         
         //SmartDashboard.putNumber("Turning PID", turningPID.get());
@@ -174,7 +224,7 @@ public class Robot extends IterativeRobotAdapter {
         //SmartDashboard.putNumber("Turning Setpoint", turningPID.getSetpoint());
         //SmartDashboard.putNumber("Encoder Rate", driveEncoder.getRate());
         //SmartDashboard.putNumber("Encoder Position", driveEncoder.getPosition());
-        // SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
+        //SmartDashboard.putBoolean("Has Gear", bucketSwitch.getPosition());
     }
 
     @Override

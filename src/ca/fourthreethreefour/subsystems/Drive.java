@@ -34,5 +34,5 @@ public interface Drive extends Settings {
         }
     };
 
-    Subsystem drive = new Subsystem(new Module[] { drivetrain, left, right });
+    public Subsystem drive = new Subsystem(new Module[] { drivetrain, left, right });
 }

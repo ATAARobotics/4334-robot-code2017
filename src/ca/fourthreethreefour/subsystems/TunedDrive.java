@@ -2,6 +2,7 @@ package ca.fourthreethreefour.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import ca.fourthreethreefour.commands.debug.Logging;
 import edu.first.identifiers.Input;
 import edu.first.identifiers.Output;
 import edu.first.module.Module;
@@ -28,6 +29,7 @@ public interface TunedDrive extends Drive {
 
         @Override
         public double get() {
+            Logging.logf("left %f right %f\n", left.get(), right.get());
             return right.get() + left.get();
         }
     }

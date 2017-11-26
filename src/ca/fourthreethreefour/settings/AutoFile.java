@@ -88,7 +88,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
         public boolean continueLoop() {
             // not autonomous anymore
             if (!DriverStation.getInstance().isAutonomous() || !DriverStation.getInstance().isEnabled()) {
-                Commands.run(new PrintConsole("command interrupted"));
+                Logging.log("command interrupted");
                 return false;
             }
             if (!timeout.started()) {
@@ -96,7 +96,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
             }
             
             if (timeout.done()) {
-                Commands.run(new PrintConsole("command timed out"));
+                Logging.log("command timed out");
             }
             return !timeout.done();
         }
@@ -154,8 +154,8 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
 
                     if (distancePID.isEnabled() && distancePID.onTarget()) {
                         correctIterations++;
-                        Commands.run(new PrintFConsole("error", distancePID.getError(), false));
-                        Commands.run(new PrintFConsole("threshold", distancePID.getTolerance()));
+                        Logging.logf("error", distancePID.getError());
+                        Logging.logf("threshold", distancePID.getTolerance());
                     } else {
                         correctIterations = 0;
                     }
@@ -167,7 +167,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                 public void firstLoop() {
                     distancePID.setSetpoint(distance);
                     distancePID.enable();
-                    Commands.run(new PrintConsole("drivedistance started"));
+                    Logging.log("drivedistance started");
                 }
 
                 @Override
@@ -175,7 +175,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     try {
                         distancePID.wait(20);
                     } catch (InterruptedException e) {}
-                    Commands.run(new SendSmartDashboard("Distance Error", distancePID.getError()));
+                    Logging.put("Distance Error", distancePID.getError());
                     double output = speedOutput.get();
                     drivetrain.set(output + compensation, output - compensation);
                 }
@@ -185,7 +185,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     distancePID.disable();
                     leftEncoder.reset();
                     rightEncoder.reset();
-                    Commands.run(new PrintConsole("drivedistance ended"));
+                    Logging.log("drivedistance ended");
                 }
             };
         }
@@ -197,6 +197,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
             int distance = Integer.parseInt(args.get(0));
             final int threshold = args.size() > 1 ? Integer.parseInt(args.get(1)) : 10;
             Timeout timeout = new Timeout(args.size() > 2 ? Integer.parseInt(args.get(2)) : 8000L);
+            double speed = args.size() > 3 ? Double.parseDouble(args.get(3)) : 1;
 
             return new LoopingCommandWithTimeout(timeout) {
                 int correctIterations = 0;
@@ -210,8 +211,8 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
 
                     if (distancePID.isEnabled() && distancePID.onTarget()) {
                         correctIterations++;
-                        Commands.run(new PrintFConsole("error", distancePID.getError(), false));
-                        Commands.run(new PrintFConsole("threshold", distancePID.getTolerance()));
+                        Logging.logf("error", distancePID.getError());
+                        Logging.logf("threshold", distancePID.getTolerance());
                     } else {
                         correctIterations = 0;
                     }
@@ -232,7 +233,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     turningPID.setSetpoint(angle);
                     turningPID.enable();
 
-                    Commands.run(new PrintFConsole("drivestraight setpoint", distancePID.getSetpoint()));
+                    Logging.logf("drivestraight setpoint", distancePID.getSetpoint());
                 }
 
                 @Override
@@ -243,13 +244,13 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                         } catch (InterruptedException e) {}
                     }
                     
-                    Commands.run(new SendSmartDashboard("Distance Error", distancePID.getError()));
-                    drivetrain.arcadeDrive(speedOutput.get(), turnOutput.get());
+                    Logging.put("Distance Error", distancePID.getError());
+                    drivetrain.arcadeDrive(speedOutput.get() * speed, turnOutput.get());
                 }
                 
                 @Override
                 public void end() {
-                    Commands.run(new PrintConsole("drivestraight ended"));
+                    Logging.log("drivestraight ended");
                     distancePID.disable();
                     turningPID.disable();
                 }
@@ -274,8 +275,8 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     }
 
                     if (turningPID.isEnabled() && turningPID.onTarget()) {
-                        Commands.run(new PrintFConsole("error", turningPID.getError(), false));
-                        Commands.run(new PrintFConsole("threshold", turningPID.getTolerance()));
+                        Logging.logf("error", turningPID.getError());
+                        Logging.logf("threshold", turningPID.getTolerance());
                         correctIterations++;
                     } else {
                         correctIterations = 0;
@@ -289,7 +290,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                     navx.reset();
                     turningPID.setSetpoint(angle);
                     turningPID.enable();
-                    Commands.run(new PrintConsole("turn started"));
+                    Logging.log("turn started");
                 }
 
                 @Override
@@ -300,12 +301,12 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
                         } catch (InterruptedException e) {} //no
                     }
                     drivetrain.arcadeDrive(0, turnOutput.get());
-                    Commands.run(new SendSmartDashboard("Turning Error", turningPID.getError()));
+                        Logging.put("Turning Error", turningPID.getError());
                 }
                 
                 @Override
                 public void end() {
-                    Commands.run(new PrintConsole("turn ended"));
+                    Logging.log("turn ended");
                     turningPID.disable();
                 }
             };

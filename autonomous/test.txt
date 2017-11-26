@@ -1,0 +1,3 @@
+print(test running)
+drivestraight(600)
+print(test finished)

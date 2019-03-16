@@ -52,8 +52,8 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
         COMMANDS.put("waitUntil", new WaitUntil());
         COMMANDS.put("deploybucket", new DeployBucket());
         COMMANDS.put("retractbucket", new RetractBucket());
-        COMMANDS.put("closeguard", new CloseGuard());
-        COMMANDS.put("openguard", new OpenGuard());
+        //COMMANDS.put("closeguard", new CloseGuard());
+        //COMMANDS.put("openguard", new OpenGuard());
     }
 
     private static class Timeout {
@@ -372,7 +372,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
             };
         }
     }
-
+/*
     private static class CloseGuard implements RuntimeCommand, GearGuard {
         @Override
         public Command getCommand(List<String> args) {
@@ -396,7 +396,7 @@ public class AutoFile extends Robot implements Drive, TunedDrive {
             };
         }
     }
-
+*/
     public static class Entry {
         final String key, value;
 

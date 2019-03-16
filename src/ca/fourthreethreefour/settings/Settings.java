@@ -14,6 +14,7 @@ public interface Settings {
     double DRIVE_COMPENSATION = settingsFile.getDoubleProperty("DRIVE_COMPENSATION", 0.0);
     double TURN_CURVE = settingsFile.getDoubleProperty("TURN_CURVE", 1.5);
     double TURN_CONSTANT = settingsFile.getDoubleProperty("TURN_CONSTANT", 1);
+    double SPEED_MULTIPLIER = settingsFile.getDoubleProperty("SPEED_MULTIPLIER", 1);
     
     double DISTANCE_P = settingsFile.getDoubleProperty("DISTANCE_P", 0.0012);
     double DISTANCE_I = settingsFile.getDoubleProperty("DISTANCE_I", 0);
@@ -46,9 +47,11 @@ public interface Settings {
     int INDICATOR = settingsFile.getIntProperty("INDICATOR", 0);
     int BUCKET_SOLENOID_PORT_1 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_1", 0);
     int BUCKET_SOLENOID_PORT_2 = settingsFile.getIntProperty("BUCKET_SOLENOID_PORT_2", 1);
-    int GROUND_INTAKE = settingsFile.getIntProperty("GROUND_INTAKE", 8);
+    int GROUND_INTAKE = settingsFile.getIntProperty("GROUND_INTAKE", 9);
     //int BUCKET_SWITCH = settingsFile.getIntProperty("BUCKET_SWITCH", 0);
     int CONTROLLER_1 = settingsFile.getIntProperty("CONTROLLER_1", 0);
     int CONTROLLER_2 = settingsFile.getIntProperty("CONTROLLER_2", 1);
     int ALLIANCE_SWITCH = settingsFile.getIntProperty("ALLIANCE_SWITCH", 0);
+    
+    long INTAKE_TIME = settingsFile.getIntProperty("INTAKE_TIME", 2000);
 }

@@ -22,7 +22,7 @@ public interface Drive extends Settings {
     Function speedFunction = new Function() {
         @Override
         public double F(double in) {
-            return in > 0 ? in * in : -(in * in);
+            return in > 0 ? in * in * SPEED_MULTIPLIER : -(in * in * SPEED_MULTIPLIER);
         }
     };
 

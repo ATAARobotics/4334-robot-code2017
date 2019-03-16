@@ -3,7 +3,7 @@ package ca.fourthreethreefour;
 import java.io.File;
 import java.io.IOException;
 
-import ca.fourthreethreefour.commands.ReverseDualActionSolenoid;
+import ca.fourthreethreefour.commands.ReverseSolenoid;
 import ca.fourthreethreefour.commands.debug.Logging;
 import ca.fourthreethreefour.settings.AutoFile;
 import edu.first.command.Command;
@@ -22,13 +22,14 @@ import edu.first.robot.IterativeRobotAdapter;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 
 public class Robot extends IterativeRobotAdapter {
     private final Subsystem AUTO_MODULES = new Subsystem(
             new Module[] { drive, bucket, groundIntake, tunedDrive });
 
     private final Subsystem TELEOP_MODULES = new Subsystem(
-            new Module[] { drive, climber, bucket, groundIntake, indicator, controllers, tunedDrive });
+            new Module[] { drive, bucket, groundIntake, controllers, tunedDrive });
 
     private final Subsystem ALL_MODULES = new Subsystem(new Module[] { AUTO_MODULES, TELEOP_MODULES });
 
@@ -48,6 +49,8 @@ public class Robot extends IterativeRobotAdapter {
             throw new Error("Wrong code deploy, dummy");
         }
 
+        LiveWindow.disableAllTelemetry();
+        
         ALL_MODULES.init();
         drivetrain.setExpiration(0.1);
         turningPID.setTolerance(TURN_TOLERANCE);
@@ -72,6 +75,7 @@ public class Robot extends IterativeRobotAdapter {
                         drivetrain.stopMotor();
                     } else {
                         turn += (speed > 0) ? DRIVE_COMPENSATION : 0;
+                        System.out.println(speed);
                         drivetrain.arcadeDrive(speed, turn);
                     }
                 }
@@ -101,7 +105,7 @@ public class Robot extends IterativeRobotAdapter {
         AxisBind groundIntakeBind = new AxisBind(controller1.getRightTrigger(), new InversedSpeedController(groundIntake));
         controller1.addAxisBind(groundIntakeBind);
         
-        controller1.addWhilePressed(XboxController.RIGHT_TRIGGER, new Command() {
+        /*controller1.addWhilePressed(XboxController.RIGHT_TRIGGER, new Command() {
 
             @Override
             public void run() {
@@ -112,12 +116,12 @@ public class Robot extends IterativeRobotAdapter {
                 
                 Logging.put("Intake Current Draw", intakeCurrentDraw);
             }
-        });
+        });*/
         
-        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseDualActionSolenoid(bucketSolenoid));
+        controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ReverseSolenoid(bucketSolenoid));
 
         // run ground intake when retracting gear
-        final long INTAKE_TIME = 2000L;
+        //final long INTAKE_TIME = 2000L;
         controller1.addWhenPressed(XboxController.RIGHT_BUMPER, new ThreadedCommand(new LoopingCommand() {
             long start = 0;
             
@@ -152,7 +156,7 @@ public class Robot extends IterativeRobotAdapter {
             }
         }));
         
-        controller1.addAxisBind(XboxController.LEFT_TRIGGER, climberMotors);
+        //controller1.addAxisBind(XboxController.LEFT_TRIGGER, climberMotors);
         
         //CameraServer.getInstance().startAutomaticCapture();
     }
@@ -200,7 +204,7 @@ public class Robot extends IterativeRobotAdapter {
     public void initTeleoperated() {
         TELEOP_MODULES.enable();
         if (bucketSolenoid.get() == Direction.OFF) {
-            bucketSolenoid.set(DualActionSolenoid.Direction.LEFT);
+            bucketSolenoid.set(BUCKET_IN);
         }
         turningPID.enable();
     }
@@ -213,11 +217,11 @@ public class Robot extends IterativeRobotAdapter {
         Logging.log("left: " + leftEncoder.get() + " right: " + rightEncoder.get() + "\n");
         Logging.log("turning: " + navx.getAngle() + "\n");
         
-        if (bucketSolenoid.get() == Direction.LEFT) {
+        /*if (bucketSolenoid.getPosition() == true) {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.FORWARDS);
         } else {
             indicator.set(edu.first.module.actuators.SpikeRelay.Direction.OFF);
-        }
+        }*/
         
         //SmartDashboard.putNumber("Turning PID", turningPID.get());
         //SmartDashboard.putNumber("Turning Error", turningPID.getError());
